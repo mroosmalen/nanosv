@@ -515,8 +515,6 @@ sub parse_svs {
     if ( $structural_variants{ $sv_id }->{_info}{'CIEND'} =~ /(\d+),(\d+)/ ) {
       push @{ $structural_variants{ $sv_id }->{_filter} }, "CIEND" if $1 > $opt{ci} or $2 > $opt{ci};
     }
-#     warn $structural_variants{ $sv_id }->{_info}{'MAPQ'} . "\n";
-#     $structural_variants{ $sv_id }->{_filter} = "MapQual" if $structural_variants{ $sv_id }->{_info}{'MAPQ'}->[0] < $opt{mapqf} or $structural_variants{ $sv_id }->{_info}{'MAPQ'}->[1] < $opt{mapqf};
     $structural_variants{ $sv_id }->printVCF();
   }
 }

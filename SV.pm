@@ -56,8 +56,8 @@ sub addInfoField {
   my ( $self, $key, $value ) = @_;
   if ( $self->{_info}{$key} =~ /ARRAY/ ) {
     if ( $self->{_info}{$key}->[0] =~ /ARRAY/ or $self->{_info}{$key}->[1] =~ /ARRAY/ ) {
-      push @{ $self->{_info}{$key}->[0] }, $value->[0][0] if $value->[0];
-      push @{ $self->{_info}{$key}->[1] }, $value->[1][0] if $value->[1];
+      push @{ $self->{_info}{$key}->[0] }, $value->[0][0] if defined $value->[0][0];
+      push @{ $self->{_info}{$key}->[1] }, $value->[1][0] if defined $value->[1][0];
     } else {
       push @{ $self->{_info}{$key} }, $value->[0];
     }
