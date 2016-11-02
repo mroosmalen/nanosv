@@ -9,7 +9,7 @@ git clone --recursive https://github.com/mroosmalen/nanosv
 
 # How to run
 ```
-perl nanosv.pl sample.bam > svs.vcf
+perl nanosv.pl [ options ] sample.bam > svs.vcf
 ```
 
 # Options
