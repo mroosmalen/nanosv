@@ -55,9 +55,16 @@ sub setSVtype {
       $self->{_svtype} = "BND";
   } else {
     $self->{_svtype} = $self->{_segment_1}{_flag} & 16 ? $self->{_segment_2}{_flag} & 16 ? "DUP" : "BND" : $self->{_segment_2}{_flag} & 16 ? "BND" : "DEL";
-    if ( abs( $self->{_segment_2}{_pos} - $self->{_segment_1}{_pos} ) < $self->{_gap} and $self->{_svtype} eq "DEL") {
+#     if ( abs( $self->{_segment_2}{_pos} - $self->{_segment_1}{_pos} ) < $self->{_gap} and $self->{_svtype} eq "DEL") {
+#       $self->{_svtype} = "INS";
+#     }
+    if ( abs( $self->{_segment_2}{_pos} - $self->{_segment_1}{_pos} ) < $self->{_gap} ) {
       $self->{_svtype} = "INS";
+      $self->{_segment_2}{_pos} = $self->{_segment_1}{_pos}+1;
+      $self->{_segment_1}{_flag} = 0;
+      $self->{_segment_2}{_flag} = 0;
     }
+    
   }
 }
 

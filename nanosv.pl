@@ -515,6 +515,7 @@ sub parse_svs {
     if ( $structural_variants{ $sv_id }->{_info}{'CIEND'} =~ /(\d+),(\d+)/ ) {
       push @{ $structural_variants{ $sv_id }->{_filter} }, "CIEND" if $1 > $opt{ci} or $2 > $opt{ci};
     }
+    $structural_variants{ $sv_id }->{_info}{'SVLEN'} = $structural_variants{ $sv_id }->{_info}{'GAP'} if $structural_variants{ $sv_id }->{_info}{'SVTYPE'} eq 'INS';
     $structural_variants{ $sv_id }->printVCF();
   }
 }
