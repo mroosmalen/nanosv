@@ -89,7 +89,7 @@ GetOptions (
   'p|pid=s'		=> \$opt{pid},
   'm|mapq=i'		=> \$opt{mapq},
   'q|mapqf=i'		=> \$opt{mapqf},
-  'i|pidf=i'		=> \$opt{pidf},
+  'i|pidf=s'		=> \$opt{pidf},
   'g|gap=i'		=> \$opt{gap},
   'y|ci=i'		=> \$opt{ci},
   'sambamba=s'		=> \$opt{sambamba}
