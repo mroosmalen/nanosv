@@ -3,13 +3,13 @@ NanoSV User Guide
 
 ## Table of Contents
 [//]: # (BEGIN automated TOC section, any edits will be overwritten on next source refresh)
+* [NanoSV summary](#nanosv-summary)
 * [Pre-processing](#pre-processing)
   * [Basecalling](#basecalling)
   * [LAST mapping](#last-mapping)
     * [LAST installation](#last-installation)
     * [Running LAST](#running-last)
 * [SV calling using NanoSV](#sv-calling-using-nanosv)
-  * [NanoSV summary](#nanosv-summary)
   * [NanoSV installation](#nanosv-installation)
   * [NanoSV usage](#nanosv-usage)
   * [NanoSV arguments and parameters](#nanosv-arguments-and-parameters)
@@ -18,6 +18,11 @@ NanoSV User Guide
     * [Optional configuration parameters](#optional-configuration-parameters)
     
 [//]: # (END automated TOC section, any edits will be overwritten on next source refresh)
+
+## NanoSV summary
+NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences sequencers.
+NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
+The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
 
 ## Pre-processing
 
@@ -76,11 +81,6 @@ All of the above commands can also be run at once using pipes:
 ```
 
 ## SV calling using NanoSV
-
-### NanoSV summary
-NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences sequencers.
-NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
-The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
 
 ### NanoSV installation
 ```
