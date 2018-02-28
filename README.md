@@ -98,15 +98,15 @@ All of the above commands can also be run at once using pipes:
 bam /path/to/reads.sorted.bam
 
 #### optional arguments:
--h, --help          show this help message and exit
+-h, --help       :   show this help message and exit
 
--s, --sambamba      Give the full path to sambamba executable [default: sambamba ]
+-s, --sambamba   :   Give the full path to sambamba executable [default: sambamba ]
 
--c, --config        Give the full path to the ini file [ default: config.ini ]
+-c, --config     :   Give the full path to the ini file [ default: config.ini ]
 
--b, --bed BED       Give the full path to the bed file [default: default.bed ]
+-b, --bed BED    :   Give the full path to the bed file [default: default.bed ]
 
--o, --output        Give the full path to the output vcf file [default: stdout ]
+-o, --output     :   Give the full path to the output vcf file [default: stdout ]
 
 
 #### optional configuration parameters:
