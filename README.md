@@ -99,10 +99,15 @@ bam /path/to/reads.sorted.bam
 
 #### optional arguments:
 -h, --help          show this help message and exit
+
 -s, --sambamba      Give the full path to sambamba executable [default: sambamba ]
+
 -c, --config        Give the full path to the ini file [ default: config.ini ]
+
 -b, --bed BED       Give the full path to the bed file [default: default.bed ]
+
 -o, --output        Give the full path to the output vcf file [default: stdout ]
+
 
 #### optional configuration parameters:
 NanoSV uses a config.ini file which contains default settings for all running parameters. Users can change the parameters by creating their own config.ini file and provide this as a command line argument [-c]
