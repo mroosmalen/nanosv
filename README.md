@@ -89,7 +89,7 @@ The core algorithm of NanoSV identifies split mapped reads and clusters the spli
 
 ### NanoSV usage
 ```
-NanoSV [-h] [-s SAMBAMBA] [-c CONFIG] [-b BED] [-o OUTPUT] [reads.sorted.bam]
+> NanoSV [-h] [-s SAMBAMBA] [-c CONFIG] [-b BED] [-o OUTPUT] [reads.sorted.bam]
 ```
 
 ### NanoSV arguments and parameters:
