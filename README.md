@@ -49,7 +49,7 @@ First you need to index your reference genome by creating a lastal database:
 ```
 > lastdb [referencedb] [reference.fa]
 ```
-Train LAST to get the best scoring parameters for the alignment. We typically use > 10,000 reads for this step
+Train LAST to get the best scoring parameters for the alignment. We typically use > 10,000 reads for this step:
 ```
 > last-train -Q1 [referencedb] [reads_sample.fastq] > [my-params]
 ```
@@ -62,7 +62,7 @@ Convert the MAF file to SAM format:
 ```
 > maf-convert -f [reference.dict] sam -r ‘ID:[id] PL:[nanopore] SM:[sample]’ [reads.maf] > [reads.sam]
 ```
-Convert SAM file to BAM file using sambamba (samtools may function similarly)
+Convert SAM file to BAM file using sambamba (samtools may function similarly):
 ```
 > sambamba view -h -S --format=bam [reads.sam] > [reads.bam]
 ```
@@ -103,7 +103,7 @@ bam              :   /path/to/reads.sorted.bam
 ```
 -h, --help       :   Show the help message and exit
 
--s, --sambamba   :   Give the full path to the sambamba executable [default: sambamba ]
+-s, --sambamba   :   Give the full path to the sambamba or samtools executable [default: sambamba ]
 
 -c, --config     :   Give the full path to the ini file [ default: config.ini ]
 
