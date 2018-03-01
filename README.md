@@ -105,11 +105,11 @@ bam              :   /path/to/reads.sorted.bam
 
 -s, --sambamba   :   Give the full path to the sambamba or samtools executable [default: sambamba ]
 
--c, --config     :   Give the full path to the ini file [ default: config.ini ]
+-c, --config     :   Give the full path to your own ini file [ default: config.ini ]
 
--b, --bed        :   Give the full path to the bed file used for coverage depth calculations [default: default.bed ]
+-b, --bed        :   Give the full path to your own bed file, used for coverage depth calculations [default: human_hg19.bed ]
 
--o, --output     :   Give the full path to the output vcf file [default: stdout ]
+-o, --output     :   Give the full path to the output vcf file [default: <stdout> ]
 ```
 
 #### optional configuration parameters:
