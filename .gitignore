@@ -1,0 +1,6 @@
+dist/
+NanoSV.egg-info/
+nanosv/__pycache__/
+nanosv/classes/__pycache__/
+nanosv/utils/__pycacje__/
+README.rst
