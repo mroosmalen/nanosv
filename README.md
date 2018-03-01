@@ -33,7 +33,7 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### LAST mapping
 
-The current version of NanoSV uses LAST mapping data. Newer releases are likely also compatible with alignments of other mappers, e.g. BWA MEM.
+The current version of NanoSV uses LAST mapping data. We are working to make NanoSV compatible with other mappers, e.g. BWA MEM, in newer releases.
 
 #### LAST installation
 
@@ -49,7 +49,7 @@ First you need to index your reference genome by creating a lastal database:
 ```
 > lastdb [referencedb] [reference.fa]
 ```
-Train LAST to get the best scoring parameters for the alignment. We typically use > 10,000 reads for this step:
+Train LAST to get the best scoring parameters for your particular alignment. We typically use a subset of > 10,000 reads for this step:
 ```
 > last-train -Q1 [referencedb] [reads_sample.fastq] > [my-params]
 ```
@@ -119,7 +119,7 @@ bam              :   /path/to/reads.sorted.bam
 #### optional configuration parameters:
 NanoSV uses a config.ini file which contains default settings for all running parameters. Users can change the parameters by creating their own config.ini file and provide this as a command line argument [-c]
 ```
-#Reads segments options
+#Reads and segments options
 [Filter options]
 # Maximum number of segments per read resulting from the mapping of the read the a reference sequence
 max_split = 10
@@ -140,7 +140,7 @@ refreads_distance = 100
 hanging_length = 20
 # Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
 mate_distance = 300
-# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’)
+# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’). Needs an auxiliar bed file, provided with -b to the main NanoSV command.
 depth_support = True
 
 #Parameters for setting the FILTER flag in the vcf output:
