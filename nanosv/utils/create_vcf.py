@@ -79,7 +79,6 @@ def set_format_header(vcf):
                     'DV': py_vcf.parser._Format('DV', 2, 'Integer', 'Number of variant reads'),
                     'GQ': py_vcf.parser._Format('GQ', 1, 'Integer', 'Genotype quality'),
                     'HR': py_vcf.parser._Format('HR', 2, 'Integer', 'Number of hanging variant reads'),
-                    #'SQ': py_vcf.parser._Format('SQ', 1, 'Float', 'Phred-scaled probability that this site is variant (non-reference in this sample)')
                     'PL': py_vcf.parser._Format('PL', 'G', 'Integer','Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification')
                   }
 
@@ -91,9 +90,9 @@ def set_filter_header(vcf):
     vcf.filters = { 'SVcluster': py_vcf.parser._Filter("SVcluster","There are more than " + str(NanoSV.opts_svcluster) + " SVs in a window of " + str(NanoSV.opts_window_size) + " on both sides"),
                     'Gap': py_vcf.parser._Filter("Gap", "The median gap size is larger than " + str(NanoSV.opts_gap_flag) + " for non insertions"),
                     'MapQual': py_vcf.parser._Filter("MapQual", "The median mapping quality is less than " + str(NanoSV.opts_mapq_flag)),
-                    'PID': py_vcf.parser._Filter("PID", "The PID of one of the segments is less than " + str(NanoSV.opts_pid_flag)),
-                    'CIPOS': py_vcf.parser._Filter("CIPOS", "The CIPOS is greater or less than " + str(NanoSV.opts_ci_flag)),
-                    'CIEND': py_vcf.parser._Filter("CIEND", "The CIEND is greater or less than " + str(NanoSV.opts_ci_flag)) ,
+                    'PID': py_vcf.parser._Filter("PID", "The median PID of one of the two sides is less than " + str(NanoSV.opts_pid_flag)),
+                    'CIPOS': py_vcf.parser._Filter("CIPOS", "The CIPOS is greater than " + str(NanoSV.opts_ci_flag)),
+                    'CIEND': py_vcf.parser._Filter("CIEND", "The CIEND is greater than " + str(NanoSV.opts_ci_flag)) ,
                     'LowQual': py_vcf.parser._Filter('LowQual','QUAL score is less than 20')
                   }
 

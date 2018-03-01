@@ -73,9 +73,9 @@ def parse_svs():
             breakpoint.structural_variants[sv_id].filter.append("MapQual")
         if breakpoint.structural_variants[sv_id].info['PID'][0] < NanoSV.opts_pid_flag or breakpoint.structural_variants[sv_id].info['PID'][1] < NanoSV.opts_pid_flag:
             breakpoint.structural_variants[sv_id].filter.append("PID")
-        if abs(breakpoint.structural_variants[sv_id].info['CIPOS'][0]) > NanoSV.opts_ci_flag or breakpoint.structural_variants[sv_id].info['CIPOS'][1] > NanoSV.opts_ci_flag:
+        if abs(breakpoint.structural_variants[sv_id].info['CIPOS'][0])+breakpoint.structural_variants[sv_id].info['CIPOS'][1] > NanoSV.opts_ci_flag:
             breakpoint.structural_variants[sv_id].filter.append("CIPOS")
-        if abs(breakpoint.structural_variants[sv_id].info['CIEND'][0]) > NanoSV.opts_ci_flag or breakpoint.structural_variants[sv_id].info['CIEND'][1] > NanoSV.opts_ci_flag:
+        if abs(breakpoint.structural_variants[sv_id].info['CIEND'][0])+breakpoint.structural_variants[sv_id].info['CIEND'][1] > NanoSV.opts_ci_flag:
             breakpoint.structural_variants[sv_id].filter.append("CIEND")
         if breakpoint.structural_variants[sv_id].info['SVTYPE'] == 'INS':
             breakpoint.structural_variants[sv_id].info['SVLEN'] = breakpoint.structural_variants[sv_id].info['GAP']
