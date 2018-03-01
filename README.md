@@ -3,9 +3,10 @@ NanoSV User Guide
 
 ## Table of Contents
 [//]: # (BEGIN automated TOC section, any edits will be overwritten on next source refresh)
-* [NanoSV summary](#nanosv-summary)
-* [NanoSV installation](#nanosv-installation)
-* [NanoSV citation](#nanosv-citation)
+* [NanoSV](#nanosv)
+  * [Summary](#summary)
+  * [Installation](#installation)
+  * [Citation](#citation)
 * [Pre-processing](#pre-processing)
   * [Basecalling](#basecalling)
   * [LAST mapping](#last-mapping)
@@ -21,16 +22,17 @@ NanoSV User Guide
     
 [//]: # (END automated TOC section, any edits will be overwritten on next source refresh)
 
-## NanoSV summary
+## NanoSV 
+### Summary
 NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences sequencers.
 NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
 The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
 
-## NanoSV installation
+### Installation
 ```
 > pip install nanosv
 ```
-## NanoSV citation
+### Citation
 Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient genomes using nanopore sequencing. Nat. Commun. 8, 1326 **(2017)**. (https://www.nature.com/articles/s41467-017-01343-4)
 
 ## Pre-processing
