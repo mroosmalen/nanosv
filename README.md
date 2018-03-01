@@ -16,6 +16,7 @@ NanoSV User Guide
     * [Required arguments](#required-arguments)
     * [Optional arguments](#optional-arguments)
     * [Optional configuration parameters](#optional-configuration-parameters)
+    * [Ancillary files that can be used for running NanoSV](#ancillary-files-that-can-be-used-for-running-nanosv)
     
 [//]: # (END automated TOC section, any edits will be overwritten on next source refresh)
 
@@ -95,19 +96,21 @@ All of the above commands can also be run at once using pipes:
 ### NanoSV arguments and parameters:
 
 #### required arguments:
-bam /path/to/reads.sorted.bam
-
+```
+bam              :   /path/to/reads.sorted.bam
+```
 #### optional arguments:
+```
 -h, --help       :   Show the help message and exit
 
 -s, --sambamba   :   Give the full path to the sambamba executable [default: sambamba ]
 
 -c, --config     :   Give the full path to the ini file [ default: config.ini ]
 
--b, --bed BED    :   Give the full path to the bed file used for coverage depth calculations [default: default.bed ]
+-b, --bed        :   Give the full path to the bed file used for coverage depth calculations [default: default.bed ]
 
 -o, --output     :   Give the full path to the output vcf file [default: stdout ]
-
+```
 
 #### optional configuration parameters:
 NanoSV uses a config.ini file which contains default settings for all running parameters. Users can change the parameters by creating their own config.ini file and provide this as a command line argument [-c]
@@ -120,4 +123,40 @@ max_split = 10
 min_pid = 0.7
 # Minimum mapping quality of the segment
 min_mapq = 20
+
+#Parameters for tuning detection and clustering of breakpoints:
+[Detection options]
+# Maximum distance between two adjacent break-end positions
+cluster_distance = 10
+# Minimum number of breakpoint-junctions (i.e. split-read junctions) for clustering
+cluster_count = 2
+# Minimum flanking length, to consider a read a reference read
+refreads_distance = 100
+# Minimum length of unmapped sequence for hanging reads that overlap a break-end
+hanging_length = 20
+# Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
+mate_distance = 300
+# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’)
+depth_support = True
+
+#Parameters for setting the FILTER flag in the vcf output:
+[Output Filter Options]
+# Filter flag: LowQual, if the QUAL score is lower
+qual_flag = 20
+# Filter flag: SVcluster, if there are more SVs within a window size, they will be marked as SVcluster
+window_size = 1000
+# Filter flag: SVcluster, indicating the number of SVs within a certain window size (set by window_size above)
+svcluster = 2
+# Filter flag: MapQual, if the median mapq is lower than specified by this parameter
+mapq_flag = 80
+# Filter flag: PID, if the median percentage identity is lower than specified by this parameter
+pid_flag = 0.80
+# Filter flag: Gap, if the median GAP is higher than specified by this parameter
+gap_flag = 100
+# Filter flag: CIPOS|CIEND, if the CIPOS|CIEND is lower or higher
+ci_flag = 20
 ```
+
+#### Ancillary files that can be used for running NanoSV:
+To estimate a coverage increase or decrease near predicted breakpoint-junctions, the average coverage across a putative deletion or duplication interval is compared to the distribution of coverage across random positions in the reference sequence. This calculation is only performed if `depth_support = True` in config.ini. A default bed file is provided that contains 1,000,000 random positions on the hg19/GRCh37 human genome reference. The file format is standard BED format (chr<TAB>startpos<TAB>endpos).
+
