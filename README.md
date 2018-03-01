@@ -64,7 +64,7 @@ Convert the MAF file to SAM format:
 ```
 The `[reference.dict]` file can be created by picard:
 ```
-> java -jar pircard.jar CreateSequenceDictionary REFERENCE=[reference.fa] OUTPUT=[reference.dict]
+> java -jar picard.jar CreateSequenceDictionary REFERENCE=[reference.fa] OUTPUT=[reference.dict]
 ```
 Convert SAM file to BAM file using sambamba (https://github.com/biod/sambamba) (samtools may function similarly):
 ```
