@@ -62,7 +62,11 @@ Convert the MAF file to SAM format:
 ```
 > maf-convert -f [reference.dict] sam -r ‘ID:[id] PL:[nanopore] SM:[sample]’ [reads.maf] > [reads.sam]
 ```
-Convert SAM file to BAM file using sambamba (samtools may function similarly):
+The `[reference.dict]` file can be created by picard:
+```
+> java -jar pircard.jar CreateSequenceDictionary REFERENCE=[reference.fa] OUTPUT=[reference.dict]
+```
+Convert SAM file to BAM file using sambamba (https://github.com/biod/sambamba) (samtools may function similarly):
 ```
 > sambamba view -h -S --format=bam [reads.sam] > [reads.bam]
 ```
@@ -153,10 +157,10 @@ mapq_flag = 80
 pid_flag = 0.80
 # Filter flag: Gap, if the median GAP is higher than specified by this parameter
 gap_flag = 100
-# Filter flag: CIPOS|CIEND, if the CIPOS|CIEND is lower or higher
-ci_flag = 20
+# Filter flag: CIPOS|CIEND, if the CIPOS|CIEND bigger than specified by this parameter
+ci_flag = 30
 ```
 
 #### Ancillary files that can be used for running NanoSV:
-To estimate a coverage increase or decrease near predicted breakpoint-junctions, the average coverage across a putative deletion or duplication interval is compared to the distribution of coverage across random positions in the reference sequence. This calculation is only performed if `depth_support = True` in config.ini. A default bed file is provided that contains 1,000,000 random positions on the hg19/GRCh37 human genome reference. The file format is standard BED format (chr<TAB>startpos<TAB>endpos).
+To estimate a coverage increase or decrease near predicted breakpoint-junctions, the average coverage across a putative deletion or duplication interval is compared to the distribution of coverage across random positions in the reference sequence. This calculation is only performed if `depth_support = True` in config.ini. A default bed file is provided that contains 1,000,000 random positions on the hg19/GRCh37 human genome reference. The file format is standard BED format (chr\<TAB\>startpos\<TAB\>endpos).
 
