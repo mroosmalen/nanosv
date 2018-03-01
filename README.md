@@ -25,6 +25,13 @@ NanoSV is a software package that can be used to identify structural genomic var
 NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
 The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
 
+## NanoSV installation
+```
+> pip install nanosv
+```
+## NanoSV citation
+Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient genomes using nanopore sequencing. Nat. Commun. 8, 1326 **(2017)**. (https://www.nature.com/articles/s41467-017-01343-4)
+
 ## Pre-processing
 
 ### Basecalling
@@ -33,7 +40,7 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### LAST mapping
 
-The current version of NanoSV uses LAST mapping data. We are working to make NanoSV compatible with other mappers, e.g. BWA MEM, in newer releases.
+The current version of NanoSV uses LAST mapping data. LAST is able to map the reads in *non-overlapping* split segments. We are working to make NanoSV compatible with other mappers, e.g. BWA MEM, in newer releases.
 
 #### LAST installation
 
@@ -86,11 +93,6 @@ All of the above commands can also be run at once using pipes:
 ```
 
 ## SV calling using NanoSV
-
-### NanoSV installation
-```
-> pip install nanosv
-```
 
 ### NanoSV usage
 ```
