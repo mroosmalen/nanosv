@@ -134,9 +134,9 @@ min_mapq = 20
 cluster_distance = 10
 # Minimum number of breakpoint-junctions (i.e. split-read junctions) for clustering
 cluster_count = 2
-# Minimum flanking length, to consider a read a reference read
+# Minimum flanking sequence length, to consider a read a reference read, i.e. the sequence mapped left and right of the breakpoint should be larger than the set value
 refreads_distance = 100
-# Minimum length of unmapped sequence for hanging reads that overlap a break-end
+# Minimum length of unmapped sequence for including reads as hanging reads that overlap (support) a break-end
 hanging_length = 20
 # Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
 mate_distance = 300
