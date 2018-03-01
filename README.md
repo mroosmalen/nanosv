@@ -144,7 +144,7 @@ mate_distance = 300
 depth_support = True
 
 #Parameters for setting the FILTER flag in the vcf output:
-[Output Filter Options]
+[Output filter options]
 # Filter flag: LowQual, if the QUAL score is lower
 qual_flag = 20
 # Filter flag: SVcluster, if there are more SVs within a window size, they will be marked as SVcluster
