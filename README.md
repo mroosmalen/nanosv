@@ -29,7 +29,7 @@ NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data,
 The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
 
 ### Installation
-NanoSV needs a working installation of python 3. You can install NanoSV with pip:
+NanoSV needs a working installation of python 3. You can install NanoSV using pip:
 ```
 > pip install nanosv
 ```
