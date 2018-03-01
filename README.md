@@ -134,9 +134,9 @@ min_mapq = 20
 cluster_distance = 10
 # Minimum number of breakpoint-junctions (i.e. split-read junctions) for clustering
 cluster_count = 2
-# Minimum flanking length, to consider a read a reference read
+# Minimum flanking sequence length, to consider a read a reference read, i.e. the sequence mapped left and right of the breakpoint should be larger than the set value
 refreads_distance = 100
-# Minimum length of unmapped sequence for hanging reads that overlap a break-end
+# Minimum length of unmapped sequence for including reads as hanging reads that overlap (support) a break-end
 hanging_length = 20
 # Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
 mate_distance = 300
@@ -145,19 +145,19 @@ depth_support = True
 
 #Parameters for setting the FILTER flag in the vcf output:
 [Output filter options]
-# Filter flag: LowQual, if the QUAL score is lower
+# Filter flag: LowQual, set if the QUAL score of the called structural variation is lower
 qual_flag = 20
-# Filter flag: SVcluster, if there are more SVs within a window size, they will be marked as SVcluster
+# Filter flag: SVcluster, set if there are more SVs within a window size, they will be marked as SVcluster
 window_size = 1000
-# Filter flag: SVcluster, indicating the number of SVs within a certain window size (set by window_size above)
+# Filter flag: SVcluster, set if the number of SVs within a certain window size (set by window_size above) exceeds this treshold
 svcluster = 2
-# Filter flag: MapQual, if the median mapq is lower than specified by this parameter
+# Filter flag: MapQual, set if the median mapq is lower than specified by this parameter
 mapq_flag = 80
-# Filter flag: PID, if the median percentage identity is lower than specified by this parameter
+# Filter flag: PID, set if the median percentage identity is lower than specified by this parameter
 pid_flag = 0.80
-# Filter flag: Gap, if the median GAP is higher than specified by this parameter
+# Filter flag: Gap, set if the median GAP is higher than specified by this parameter
 gap_flag = 100
-# Filter flag: CIPOS|CIEND, if the CIPOS|CIEND bigger than specified by this parameter
+# Filter flag: CIPOS|CIEND, set if the CIPOS|CIEND is larger than specified by this parameter
 ci_flag = 30
 ```
 
