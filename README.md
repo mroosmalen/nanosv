@@ -3,14 +3,16 @@ NanoSV User Guide
 
 ## Table of Contents
 [//]: # (BEGIN automated TOC section, any edits will be overwritten on next source refresh)
-* [NanoSV summary](#nanosv-summary)
+* [NanoSV](#nanosv)
+  * [Summary](#summary)
+  * [Installation](#installation)
+  * [Citation](#citation)
 * [Pre-processing](#pre-processing)
   * [Basecalling](#basecalling)
   * [LAST mapping](#last-mapping)
     * [LAST installation](#last-installation)
     * [Running LAST](#running-last)
 * [SV calling using NanoSV](#sv-calling-using-nanosv)
-  * [NanoSV installation](#nanosv-installation)
   * [NanoSV usage](#nanosv-usage)
   * [NanoSV arguments and parameters](#nanosv-arguments-and-parameters)
     * [Required arguments](#required-arguments)
@@ -20,10 +22,19 @@ NanoSV User Guide
     
 [//]: # (END automated TOC section, any edits will be overwritten on next source refresh)
 
-## NanoSV summary
+## NanoSV 
+### Summary
 NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences sequencers.
 NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
 The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
+
+### Installation
+NanoSV needs a working installation of python 3. You can install NanoSV using pip:
+```
+> pip install nanosv
+```
+### Citation
+Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient genomes using nanopore sequencing. Nat. Commun. 8, 1326 **(2017)**. (https://www.nature.com/articles/s41467-017-01343-4)
 
 ## Pre-processing
 
@@ -33,7 +44,7 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### LAST mapping
 
-The current version of NanoSV uses LAST mapping data. Newer releases are likely also compatible with alignments of other mappers, e.g. BWA MEM.
+The current version of NanoSV uses LAST mapping data. LAST is able to map the reads in *non-overlapping* split segments. We are working to make NanoSV compatible with other mappers, e.g. BWA MEM, in newer releases.
 
 #### LAST installation
 
@@ -49,7 +60,7 @@ First you need to index your reference genome by creating a lastal database:
 ```
 > lastdb [referencedb] [reference.fa]
 ```
-Train LAST to get the best scoring parameters for the alignment. We typically use > 10,000 reads for this step:
+Train LAST to get the best scoring parameters for your particular alignment. We typically use a subset of > 10,000 reads for this step:
 ```
 > last-train -Q1 [referencedb] [reads_sample.fastq] > [my-params]
 ```
@@ -64,7 +75,7 @@ Convert the MAF file to SAM format:
 ```
 The `[reference.dict]` file can be created by picard:
 ```
-> java -jar pircard.jar CreateSequenceDictionary REFERENCE=[reference.fa] OUTPUT=[reference.dict]
+> java -jar picard.jar CreateSequenceDictionary REFERENCE=[reference.fa] OUTPUT=[reference.dict]
 ```
 Convert SAM file to BAM file using sambamba (https://github.com/biod/sambamba) (samtools may function similarly):
 ```
@@ -86,11 +97,6 @@ All of the above commands can also be run at once using pipes:
 ```
 
 ## SV calling using NanoSV
-
-### NanoSV installation
-```
-> pip install nanosv
-```
 
 ### NanoSV usage
 ```
@@ -119,7 +125,7 @@ bam              :   /path/to/reads.sorted.bam
 #### optional configuration parameters:
 NanoSV uses a config.ini file which contains default settings for all running parameters. Users can change the parameters by creating their own config.ini file and provide this as a command line argument [-c]
 ```
-#Reads segments options
+#Reads and segments options
 [Filter options]
 # Maximum number of segments per read resulting from the mapping of the read the a reference sequence
 max_split = 10
@@ -140,7 +146,7 @@ refreads_distance = 100
 hanging_length = 20
 # Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
 mate_distance = 300
-# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’)
+# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’). Needs an auxiliar bed file, provided with -b to the main NanoSV command.
 depth_support = True
 
 #Parameters for setting the FILTER flag in the vcf output:
