@@ -33,33 +33,36 @@ def parse_bam():
     else:
         sample_name = re.sub('(\.sorted)?\.bam$', '', str(NanoSV.opts_bam))
     
-    for line in bam:               
+    for line in bam:
         if line.query_name in reads:
             read = reads[line.query_name]
         else:
             read = r.Read(line.query_name, line.infer_read_length())
             reads[line.query_name] = read
+        
         if line.flag & 4 or line.mapping_quality < NanoSV.opts_min_mapq:
             continue
         segment = s.Segment(segmentID, line.query_name, line.flag, line.reference_name, line.reference_start+1, line.mapping_quality,
                             line.query_alignment_length)
         segment.end = line.reference_start + line.reference_length
         segment.pid = format(line.get_cigar_stats()[0][7] / segment.length, '.3f')
+        if segment.pid == "0.000":
+            segment.pid = format(line.get_cigar_stats()[0][0] / segment.length, '.3f')
         if line.flag & 16:
-            if line.cigartuples[-1][0] == 5:
+            if line.cigartuples[-1][0] == 5 or line.cigartuples[-1][0] == 4:
                 segment.clip = line.cigartuples[-1][1]
             else:
                 segment.clip = 0
-            if line.cigartuples[0][0] == 5:
+            if line.cigartuples[0][0] == 5 or line.cigartuples[0][0] == 4:
                 segment.clip_2 = line.cigartuples[0][1]
             else:
                 segment.clip_2 = 0
         else:
-            if line.cigartuples[0][0] == 5:
+            if line.cigartuples[0][0] == 5 or line.cigartuples[0][0] == 4:
                 segment.clip = line.cigartuples[0][1]
             else:
                 segment.clip = 0
-            if line.cigartuples[-1][0] == 5:
+            if line.cigartuples[-1][0] == 5 or line.cigartuples[-1][0] == 4:
                 segment.clip_2 = line.cigartuples[-1][1]
             else:
                 segment.clip_2 = 0
@@ -68,4 +71,6 @@ def parse_bam():
         read.addSegment(segment)
         segments[segmentID] = segment
         segmentID += 1
+
+        
 

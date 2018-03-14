@@ -25,10 +25,12 @@ def addSVInfo(sv):
     :param sv is SV-object:
     """
     if sum(sv.format['DV']) >= NanoSV.opts_cluster_count * 2:
-        for flag in [sv.flag1 - 1, sv.flag2 + 1]:
-
-            if flag == -1 or flag == 17: head_tail = 'T'
-            if flag == 15 or flag == 1: head_tail = 'H'
+        flag_list = [sv.flag1, sv.flag2]
+        for flag_idx in range(len(flag_list)):            
+            if ( flag_idx == 0 and not flag_list[flag_idx] & 16 ) or ( flag_idx == 1 and flag_list[flag_idx] & 16 ):
+                head_tail = 'T'
+            else:
+                head_tail = 'H'
 
             for hanging_pos in sorted(read.hanging_breakpoints_region[sv.chr][head_tail]):
                 if hanging_pos < (min(sv.pos) - NanoSV.opts_cluster_distance):
@@ -38,8 +40,8 @@ def addSVInfo(sv):
                 for hanging_id in read.hanging_breakpoints_region[sv.chr][head_tail][hanging_pos]:
                     segment_id = read.hanging_breakpoints_region[sv.chr][head_tail][hanging_pos][hanging_id]
                     if segment_id == 0: continue
-                    sv.format['HR'][0] += 1
-                    sv.format['VO'][0] += (1 - 10 ** (-bam.segments[segment_id].mapq / 10.0))
+                    sv.format['HR'][flag_idx] += 1
+                    sv.format['VO'][flag_idx] += (1 - 10 ** (-bam.segments[segment_id].mapq / 10.0))
                     sv.addInfoField("PID", [[bam.segments[segment_id].pid], None])
                     sv.addInfoField("MAPQ", [[bam.segments[segment_id].mapq], None])
                     sv.addInfoField("PLENGTH", [[bam.segments[segment_id].plength], None])
@@ -98,6 +100,7 @@ def parse_breakpoints():
     Loops through breakpoints_region dict and calls parse_breakpoints_2
     """
     sys.stderr.write(time.strftime("%c") + " Busy with parsing breakpoints...\n")
+
     for region in read.breakpoints_region:
         prev_pos_1 = -1
         breakpoints_region_2 = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))

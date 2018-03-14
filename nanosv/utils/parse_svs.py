@@ -55,10 +55,10 @@ def parse_svs():
                 breakpoint.structural_variants[sv_id_2].SVcluster += 1
             if breakpoint.structural_variants[sv_id_2].info['SVTYPE'] != "BND": continue
             if breakpoint.structural_variants[sv_id].info['SVTYPE'] != "BND": continue
-            if (breakpoint.structural_variants[sv_id].flag1 == 0 and breakpoint.structural_variants[sv_id].flag2 == 0) and not (breakpoint.structural_variants[sv_id_2].flag1 == 16 and breakpoint.structural_variants[sv_id_2].flag2 == 16): continue
-            if (breakpoint.structural_variants[sv_id].flag1 == 0 and breakpoint.structural_variants[sv_id].flag2 == 16) and not (breakpoint.structural_variants[sv_id_2].flag1 == 16 and breakpoint.structural_variants[sv_id_2].flag2 == 0): continue
-            if (breakpoint.structural_variants[sv_id].flag1 == 16 and breakpoint.structural_variants[sv_id].flag2 == 0) and not (breakpoint.structural_variants[sv_id_2].flag1 == 0 and breakpoint.structural_variants[sv_id_2].flag2 == 16): continue
-            if (breakpoint.structural_variants[sv_id].flag1 == 16 and breakpoint.structural_variants[sv_id].flag2 == 16) and not (breakpoint.structural_variants[sv_id_2].flag1 == 0 and breakpoint.structural_variants[sv_id_2].flag2 == 0): continue
+            if ( not breakpoint.structural_variants[sv_id].flag1 & 16 and not breakpoint.structural_variants[sv_id].flag2 & 16) and not (breakpoint.structural_variants[sv_id_2].flag1 & 16 and breakpoint.structural_variants[sv_id_2].flag2 & 16): continue
+            if ( not breakpoint.structural_variants[sv_id].flag1 & 16 and breakpoint.structural_variants[sv_id].flag2 & 16) and not (breakpoint.structural_variants[sv_id_2].flag1 & 16 and not breakpoint.structural_variants[sv_id_2].flag2 & 16): continue
+            if (breakpoint.structural_variants[sv_id].flag1 & 16 and not breakpoint.structural_variants[sv_id].flag2 & 16) and not ( not breakpoint.structural_variants[sv_id_2].flag1 & 16 and breakpoint.structural_variants[sv_id_2].flag2 & 16): continue
+            if (breakpoint.structural_variants[sv_id].flag1 & 16 and breakpoint.structural_variants[sv_id].flag2 & 16) and not ( not breakpoint.structural_variants[sv_id_2].flag1 & 16 and not breakpoint.structural_variants[sv_id_2].flag2 & 16): continue
             if abs(breakpoint.structural_variants[sv_id].pos - breakpoint.structural_variants[sv_id_2].pos) > NanoSV.opts_mate_distance: continue
             if abs(breakpoint.structural_variants[sv_id].info['END'] - breakpoint.structural_variants[sv_id_2].info['END']) > NanoSV.opts_mate_distance: continue
             breakpoint.structural_variants[sv_id].info['MATEID'] = sv_id_2
