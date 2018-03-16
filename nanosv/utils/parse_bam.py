@@ -25,14 +25,18 @@ def parse_bam():
     sys.stderr.write(time.strftime("%c") + " Busy with parsing bam file...\n")
     bam = pysam.AlignmentFile(NanoSV.opts_bam, 'rb')
     header = bam.header
+    print( header )
     if 'HD' in header:
         if not header['HD']['SO'] == 'coordinate':
             sys.exit('The bam file is not coordinate sorted')
     if 'RG' in header:
-        sample_name = header['RG']['SM']
+        if type(header['RG']) is list:
+            sample_name = header['RG'][0]['SM']
+        else:
+            sample_name = header['RG']['SM']
     else:
         sample_name = re.sub('(\.sorted)?\.bam$', '', str(NanoSV.opts_bam))
-    
+
     for line in bam:
         if line.query_name in reads:
             read = reads[line.query_name]
