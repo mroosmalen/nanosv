@@ -49,9 +49,13 @@ def parse_bam():
         segment = s.Segment(segmentID, line.query_name, line.flag, line.reference_name, line.reference_start+1, line.mapping_quality,
                             line.query_alignment_length)
         segment.end = line.reference_start + line.reference_length
-        segment.pid = format(line.get_cigar_stats()[0][7] / segment.length, '.3f')
-        if segment.pid == "0.000":
-            segment.pid = format(line.get_cigar_stats()[0][0] / segment.length, '.3f')
+        if line.has_tag('MD'):
+            matches = sum( map(int, re.findall(r"(\d+)", line.get_tag('MD') )) )
+            segment.pid = format(matches / segment.length, '.3f')
+        else:
+            segment.pid = format(line.get_cigar_stats()[0][7] / segment.length, '.3f')
+            if segment.pid == "0.000":
+                segment.pid = format(line.get_cigar_stats()[0][0] / segment.length, '.3f')
         if line.flag & 16:
             if line.cigartuples[-1][0] == 5 or line.cigartuples[-1][0] == 4:
                 segment.clip = line.cigartuples[-1][1]
