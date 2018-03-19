@@ -2,5 +2,9 @@ dist/
 NanoSV.egg-info/
 nanosv/__pycache__/
 nanosv/classes/__pycache__/
-nanosv/utils/__pycacje__/
+nanosv/utils/__pycache__/
 README.rst
+NanoSV.pyc
+nanosv/utils/__init__.pyc
+nanosv/utils/coverage.pyc
+ 

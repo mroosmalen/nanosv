@@ -33,10 +33,9 @@ def parse_reads():
             segment_2 = bam.segments[bam.reads[qname].segments[clips[i2]]]
             segment_1.setPlength(bam.reads[qname].length)
             segment_2.setPlength(bam.reads[qname].length)
-
             breakpoint = b.Breakpoint(breakpointID, segment_1, segment_2)
             breakpointID += 1
-
+            
             gap = (clips[i2] - (clips[i] + segment_1.length))
             breakpoint.setGap(gap)
             breakpoint.setBreakpoint(segment_1, segment_2)
@@ -49,6 +48,7 @@ def parse_reads():
             breakpoints[breakpoint.id] = breakpoint
             values = ( breakpoint.svtype, str(breakpoint.segment_1["rname"]), str(breakpoint.segment_2["rname"]), str(breakpoint.segment_1["flag"]), str(breakpoint.segment_2["flag"]) )
             breakpoints_region["\t".join(values)][breakpoint.segment_1["pos"]][breakpoint.id] = 1
+            
             if i == 0 and segment_1.clip >= NanoSV.opts_hanging_length:
                 hanging_breakpoint_pos = segment_1.pos
                 if segment_1.flag & 16:

@@ -161,67 +161,42 @@ class SV:
         gt_lplist = self.bayes_gt(sum(self.format['RO']), sum(self.format['VO']), dup)
         gt_sum = 0
         
-        #print( 'gt_lplist', gt_lplist )
         pplist = []
         for gt in gt_lplist:
             pplist.append( 10 ** gt )
             gt_sum += 10 ** gt
-        #print( 'pplist', pplist )
+        
+        if gt_sum > 0:
+            npplist = [x / gt_sum for x in pplist]
             
-        npplist = [x / gt_sum for x in pplist]
-        #print( 'npplist', npplist )
-        
-        plplist = []
-        for p in npplist:
-            if p > 0:
-                plplist.append( int( -10 * log10( p ) ) )
-            else:
-                plplist.append( 9999 )
-        #print( 'plplist', plplist )
-        
-        gt_idx = plplist.index(min(plplist))
-        gq_idx = plplist.index(sorted(plplist)[1])
-        
-        plplist[gt_idx] = 0
-        
-        if gt_idx == 0:
-            self.format['GT'] = '0/0'
-        elif gt_idx == 1:
-            self.format['GT'] = '0/1'
-        elif gt_idx == 2:
-            self.format['GT'] = '1/1'
-        
-        self.format['PL'] = plplist
-        self.format['GQ'] = plplist[gq_idx]
-        self.qual = plplist[0]
-        
-        #gt_idx = gt_lplist.index(max(gt_lplist))
-
-        #gt_sum = 0
-        #for gt in gt_lplist:
-            #pplist.append( 10 ** gt )
-            #gt_sum += 10 ** gt
+            plplist = []
+            for p in npplist:
+                if p > 0:
+                    plplist.append( int( -10 * log10( p ) ) )
+                else:
+                    plplist.append( 9999 )
             
-
-        #if (gt_sum > 0):
-            #gt_sum_log = log10(gt_sum)
-            #sample_qual = abs(-10 * (gt_lplist[0] - gt_sum_log))
-
-            #if 1 - (10 ** gt_lplist[gt_idx] / 10 ** gt_sum_log) == 0:
-                #phred_gq = 200
-            #else:
-                #phred_gq = abs(-10 * log10(1 - (10 ** gt_lplist[gt_idx] / 10 ** gt_sum_log)))
-
-            #self.format['GQ'] = int(phred_gq)
-            #self.format['SQ'] = '%.3f' % ( sample_qual )
-
-            #if gt_idx == 0:
-                #self.format['GT'] = '0/0'
-            #elif gt_idx == 1:
-                #self.format['GT'] = '0/1'
-            #elif gt_idx == 2:
-                #self.format['GT'] = '1/1'
-
+            gt_idx = plplist.index(min(plplist))
+            gq_idx = plplist.index(sorted(plplist)[1])
+            
+            plplist[gt_idx] = 0
+            
+            if gt_idx == 0:
+                self.format['GT'] = '0/0'
+            elif gt_idx == 1:
+                self.format['GT'] = '0/1'
+            elif gt_idx == 2:
+                self.format['GT'] = '1/1'
+            
+            self.format['PL'] = plplist
+            self.format['GQ'] = plplist[gq_idx]
+            self.qual = plplist[0]
+        else:
+            self.format['GT'] = './.'
+            self.format['PL'] = [0, 0, 0]
+            self.format['GQ'] = [0]
+            self.qual = 0
+            
         self.set = 1
 
     def getDupDelcoverage(self):

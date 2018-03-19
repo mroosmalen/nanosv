@@ -3,8 +3,16 @@
 class Breakpoint:
     def __init__(self, id, segment_1, segment_2):
         self.id = id
-        self.segment_1 = {"id": segment_1.id, "rname": segment_1.rname, "flag": segment_1.flag, "mapq":segment_1.mapq}
-        self.segment_2 = {"id": segment_2.id, "rname": segment_2.rname, "flag": segment_2.flag, "mapq":segment_2.mapq}
+        if segment_1.flag & 16:
+            flag_1 = 16
+        else:
+            flag_1 = 0
+        if segment_2.flag & 16:
+            flag_2 = 16
+        else:
+            flag_2 = 0
+        self.segment_1 = {"id": segment_1.id, "rname": segment_1.rname, "flag": flag_1, "mapq":segment_1.mapq}
+        self.segment_2 = {"id": segment_2.id, "rname": segment_2.rname, "flag": flag_2, "mapq":segment_2.mapq}
 
     def setGap(self, gap):
         """
