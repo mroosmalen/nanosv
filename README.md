@@ -9,6 +9,7 @@ NanoSV User Guide
   * [Citation](#citation)
 * [Pre-processing](#pre-processing)
   * [Basecalling](#basecalling)
+  * [Mapping](#mapping)
   * [LAST mapping](#last-mapping)
     * [LAST installation](#last-installation)
     * [Running LAST](#running-last)
@@ -42,9 +43,13 @@ Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient
 
 Raw sequencing data can be basecalled using any available basecaller that is suited for your data. We use albacore for MinION/GridION/PromethION sequencing data, available through the nanopore community: http://community.nanoporetech.com/. Albacore can directly produce fastq files suitable for subsequent mapping to a reference genome.
 
+### Mapping
+
+NanoSV was build based on LAST mapping data. The current version of NanoSV is now also compatible with BWA MEM, MINIMAP2 and NGMLR.
+
 ### LAST mapping
 
-The current version of NanoSV uses LAST mapping data. LAST is able to map the reads in *non-overlapping* split segments. We are working to make NanoSV compatible with other mappers, e.g. BWA MEM, in newer releases.
+LAST is able to map the reads in *non-overlapping* split segments.
 
 #### LAST installation
 
