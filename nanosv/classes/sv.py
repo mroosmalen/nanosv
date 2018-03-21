@@ -215,7 +215,7 @@ class SV:
         if 'sambamba' in NanoSV.opts_sambamba:
             cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
         elif 'samtools' in NanoSV.opts_sambamba:
-            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{if (NR!=1) print $3}'"
+            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{print $3}'"
         
         with os.popen(cmd) as commandoutput:
             for line in commandoutput:
