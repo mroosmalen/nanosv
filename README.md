@@ -45,7 +45,7 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### Mapping
 
-NanoSV was build based on LAST mapping data. The current version of NanoSV is now also compatible with BWA MEM, MINIMAP2 and NGMLR.
+NanoSV was built based on LAST mapping data. The current version of NanoSV is now also compatible with BWA MEM, MINIMAP2 and NGMLR.
 
 ### LAST mapping
 

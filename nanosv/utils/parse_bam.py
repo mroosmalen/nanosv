@@ -24,11 +24,12 @@ def parse_bam():
     global sample_name, header, segmentID, bam
     sys.stderr.write(time.strftime("%c") + " Busy with parsing bam file...\n")
     bam = pysam.AlignmentFile(NanoSV.opts_bam, 'rb')
-    header = bam.header
-    print( header )
+    if not bam.has_index():
+        sys.exit('The bam has no index file')    
+    header = bam.header    
     if 'HD' in header:
         if not header['HD']['SO'] == 'coordinate':
-            sys.exit('The bam file is not coordinate sorted')
+            sys.exit('The bam file is not coordinate sorted')    
     if 'RG' in header:
         if type(header['RG']) is list:
             sample_name = header['RG'][0]['SM']
