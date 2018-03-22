@@ -34,6 +34,12 @@ NanoSV needs a working installation of python 3. You can install NanoSV using pi
 ```
 > pip install nanosv
 ```
+
+Alternatively, you can get NanoSV from bioconda:
+```
+conda install -c bioconda nanosv 
+```
+
 ### Citation
 Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient genomes using nanopore sequencing. Nat. Commun. 8, 1326 **(2017)**. (https://www.nature.com/articles/s41467-017-01343-4)
 
