@@ -22,11 +22,11 @@ def calculate_coverage_bed():
         cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -b " + NanoSV.opts_bed + " | awk '{print $3}'"
     else:
         sys.exit('No sambamba or samtools found')
-    
+
     with os.popen(cmd) as coverageOutput:
         for coverage in coverageOutput:
             if coverage != "" and coverage != "\n":
                 coverages.append(int(coverage))
-    
-    if ( len(coverages) == 0 ):
-        sys.exit('Can\'t calculate coverage distribution. The bed file may be inappropriate for your bam file.')
+
+    if len(coverages) == 0:
+        sys.exit("Can't calculate coverage distribution. The bed file may be inappropriate for your bam file.")

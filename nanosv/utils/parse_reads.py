@@ -15,6 +15,7 @@ breakpoints = {}
 breakpoints_region = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 hanging_breakpoints_region = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int))))
 
+
 def parse_reads():
     """
     Loops through all reads and saves breakpoints in objects of the Breakpoint class
@@ -35,7 +36,7 @@ def parse_reads():
             segment_2.setPlength(bam.reads[qname].length)
             breakpoint = b.Breakpoint(breakpointID, segment_1, segment_2)
             breakpointID += 1
-            
+
             gap = (clips[i2] - (clips[i] + segment_1.length))
             breakpoint.setGap(gap)
             breakpoint.setBreakpoint(segment_1, segment_2)
@@ -46,28 +47,27 @@ def parse_reads():
 
             breakpoint.setSVtype()
             breakpoints[breakpoint.id] = breakpoint
-            values = ( breakpoint.svtype, str(breakpoint.segment_1["rname"]), str(breakpoint.segment_2["rname"]), str(breakpoint.segment_1["flag"]), str(breakpoint.segment_2["flag"]) )
+            values = (breakpoint.svtype, str(breakpoint.segment_1["rname"]),
+                      str(breakpoint.segment_2["rname"]),
+                      str(breakpoint.segment_1["flag"]),
+                      str(breakpoint.segment_2["flag"]))
             breakpoints_region["\t".join(values)][breakpoint.segment_1["pos"]][breakpoint.id] = 1
-            
+
             if i == 0 and segment_1.clip >= NanoSV.opts_hanging_length:
                 hanging_breakpoint_pos = segment_1.pos
                 if segment_1.flag & 16:
                     hanging_breakpoint_pos = segment_1.end
-                    hanging_breakpoints_region[segment_1.rname]['T'][hanging_breakpoint_pos][
-                        hanging_breakpointID] = segment_1.id
+                    hanging_breakpoints_region[segment_1.rname]['T'][hanging_breakpoint_pos][hanging_breakpointID] = segment_1.id
                     hanging_breakpointID -= 1
                 else:
-                    hanging_breakpoints_region[segment_1.rname]['H'][hanging_breakpoint_pos][
-                        hanging_breakpointID] = segment_1.id
+                    hanging_breakpoints_region[segment_1.rname]['H'][hanging_breakpoint_pos][hanging_breakpointID] = segment_1.id
                     hanging_breakpointID = hanging_breakpointID - 1
             if i2 == len(clips) - 1 and segment_2.clip_2 >= NanoSV.opts_hanging_length:
                 hanging_breakpoint_pos = segment_2.end
                 if segment_2.flag & 16:
                     hanging_breakpoint_pos = segment_2.pos
-                    hanging_breakpoints_region[segment_2.rname]['H'][hanging_breakpoint_pos][
-                        hanging_breakpointID] = segment_2.id
+                    hanging_breakpoints_region[segment_2.rname]['H'][hanging_breakpoint_pos][hanging_breakpointID] = segment_2.id
                     hanging_breakpointID -= 1
                 else:
-                    hanging_breakpoints_region[segment_2.rname]['T'][hanging_breakpoint_pos][
-                        hanging_breakpointID] = segment_2.id
+                    hanging_breakpoints_region[segment_2.rname]['T'][hanging_breakpoint_pos][hanging_breakpointID] = segment_2.id
                     hanging_breakpointID -= 1
