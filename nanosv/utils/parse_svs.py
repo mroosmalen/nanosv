@@ -1,12 +1,9 @@
 #!/usr/bin/python
-import re
 import sys
 import time
-import os 
-import pysam
+import os
 
 from utils import parse_bam as bam
-from utils import parse_reads as read
 from utils import parse_breakpoints as breakpoint
 from utils import create_vcf as vcf
 
