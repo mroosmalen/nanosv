@@ -289,7 +289,7 @@ class SV:
                         self.info[field][0] = round(self.info[field][0], 3)
                         self.info[field][1] = round(self.info[field][1], 3)
                 else:
-                    if not 'CI' in field:
+                    if 'CI' not in field:
                         self.info[field] = self.median_type(self.info[field])
 
     def median_type(self, toCalculate):
@@ -314,8 +314,9 @@ class SV:
         format_list.remove('GT')
         format_list.insert(0, 'GT')
         format = ':'.join(format_list)
-       
-        call = py_vcf.model._Call('site', bam.sample_name, collections.namedtuple('CallData', format_list)(**self.format))
+
+        data = collections.namedtuple('CallData', format_list)(**self.format)
+        call = py_vcf.model._Call('site', bam.sample_name, data)
         samples_indexes = [0]
         samples = [call]
         return [format, samples_indexes, samples]
