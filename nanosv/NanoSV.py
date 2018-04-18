@@ -43,6 +43,8 @@ opts_pid_flag = float(cfg.get('Output filter options', 'pid_flag'))
 opts_gap_flag = int(cfg.get('Output filter options', 'gap_flag'))
 opts_ci_flag = int(cfg.get('Output filter options', 'ci_flag'))
 
+opts_threads = int(cfg.get('Runtime options', 'sambamba_threads'))
+
 def main():    
     if opts_depth_support:
         utils.coverage.calculate_coverage_bed()
