@@ -4,7 +4,7 @@
 import random
 
 pick_random = 100000
-mask_regions = dict()
+mask_regions = {}
 
 genome = {
     1: 249250621,
@@ -42,34 +42,34 @@ def read_bed(file):
     with (open(file, 'r')) as bed:
         for line in bed:
             line = line.rstrip()
-            chr, start, end = line.split("\t")
-            chr = chr.replace('chr', '')
-            if chr == 'X':
-                chr = 23
+            ch, start, end = line.split("\t")
+            ch = ch.replace('ch', '')
+            if ch == 'X':
+                ch = 23
             try:
-                chr = int(chr)
+                ch = int(ch)
             except:
                 continue
-            if chr not in genome:
+            if ch not in genome:
                 continue
-            if chr not in mask_regions:
-                mask_regions[chr] = dict()
-            if start not in mask_regions[chr]:
-                mask_regions[chr][int(start)] = dict()
-            mask_regions[chr][int(start)][int(end)] = 1
+            if ch not in mask_regions:
+                mask_regions[ch] = {}
+            if start not in mask_regions[ch]:
+                mask_regions[ch][int(start)] = {}
+            mask_regions[ch][int(start)][int(end)] = 1
 
 
 read_bed(simple_repeats_file)
 read_bed(gaps_file)
 
-random_positions = dict()
+random_positions = {}
 
 while len(random_positions.keys()) < pick_random:
     randnum = random.randrange(1, genome_length)
     tmp_length = 0
-    for chr, chrlength in sorted(genome.iteritems()):
+    for ch, chrlength in sorted(genome.iteritems()):
         if randnum < tmp_length + chrlength:
-            randchr = chr
+            randchr = ch
             randpos = randnum - tmp_length
             break
         tmp_length += chrlength
