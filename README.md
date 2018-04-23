@@ -176,6 +176,10 @@ pid_flag = 0.80
 gap_flag = 100
 # Filter flag: CIPOS|CIEND, set if the CIPOS|CIEND is larger than specified by this parameter
 ci_flag = 30
+
+[Runtime options]
+# Number of threads to use with sambamba
+sambamba_threads = 1
 ```
 
 #### Ancillary files that can be used for running NanoSV:
