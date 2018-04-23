@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+
 class Read:
     def __init__(self, qname, length):
         self.qname = qname
