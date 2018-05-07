@@ -16,6 +16,7 @@ reads = {}
 segments = {}
 segmentID = 1
 
+
 def parse_bam():
     """
     Reads bam file and saves reads and their segments in objects of the Read en Segment classes.
@@ -25,11 +26,11 @@ def parse_bam():
     sys.stderr.write(time.strftime("%c") + " Busy with parsing bam file...\n")
     bam = pysam.AlignmentFile(NanoSV.opts_bam, 'rb')
     if not bam.has_index():
-        sys.exit('The bam has no index file')    
-    header = bam.header    
+        sys.exit('The bam has no index file')
+    header = bam.header
     if 'HD' in header:
         if not header['HD']['SO'] == 'coordinate':
-            sys.exit('The bam file is not coordinate sorted')    
+            sys.exit('The bam file is not coordinate sorted')
     if 'RG' in header:
         if type(header['RG']) is list:
             sample_name = header['RG'][0]['SM']
@@ -44,14 +45,14 @@ def parse_bam():
         else:
             read = r.Read(line.query_name, line.infer_read_length())
             reads[line.query_name] = read
-        
+
         if line.flag & 4 or line.mapping_quality < NanoSV.opts_min_mapq:
             continue
         segment = s.Segment(segmentID, line.query_name, line.flag, line.reference_name, line.reference_start+1, line.mapping_quality,
                             line.query_alignment_length)
         segment.end = line.reference_start + line.reference_length
         if line.has_tag('MD'):
-            matches = sum( map(int, re.findall(r"(\d+)", line.get_tag('MD') )) )
+            matches = sum(map(int, re.findall(r"(\d+)", line.get_tag('MD'))))
             segment.pid = format(matches / segment.length, '.3f')
         else:
             segment.pid = format(line.get_cigar_stats()[0][7] / segment.length, '.3f')
@@ -80,6 +81,3 @@ def parse_bam():
         read.addSegment(segment)
         segments[segmentID] = segment
         segmentID += 1
-
-        
-

@@ -26,8 +26,8 @@ def addSVInfo(sv):
     """
     if sum(sv.format['DV']) >= NanoSV.opts_cluster_count * 2:
         flag_list = [sv.flag1, sv.flag2]
-        for flag_idx in range(len(flag_list)):            
-            if ( flag_idx == 0 and not flag_list[flag_idx] & 16 ) or ( flag_idx == 1 and flag_list[flag_idx] & 16 ):
+        for flag_idx in range(len(flag_list)):
+            if (flag_idx == 0 and not flag_list[flag_idx] & 16) or (flag_idx == 1 and flag_list[flag_idx] & 16):
                 head_tail = 'T'
             else:
                 head_tail = 'H'
@@ -79,10 +79,10 @@ def parse_breakpoints_2(breakpoints_region_2):
                     sv = svclass.SV(svID, breakpoint)
                     svID += 1
 
-                sv.addInfoField("PID",[ [bam.segments[breakpoint.segment_1["id"]].pid],[bam.segments[breakpoint.segment_2["id"]].pid] ])
-                sv.addInfoField("MAPQ",[ [bam.segments[breakpoint.segment_1["id"]].mapq],[bam.segments[breakpoint.segment_2["id"]].mapq] ])
-                sv.addInfoField("PLENGTH",[ [bam.segments[breakpoint.segment_1["id"]].plength],[bam.segments[breakpoint.segment_2["id"]].plength] ])
-                sv.addInfoField("RLENGTH",[ bam.reads[bam.segments[breakpoint.segment_2["id"]].qname].length ])
+                sv.addInfoField("PID", [[bam.segments[breakpoint.segment_1["id"]].pid], [bam.segments[breakpoint.segment_2["id"]].pid]])
+                sv.addInfoField("MAPQ", [ [bam.segments[breakpoint.segment_1["id"]].mapq], [bam.segments[breakpoint.segment_2["id"]].mapq]])
+                sv.addInfoField("PLENGTH", [[bam.segments[breakpoint.segment_1["id"]].plength], [bam.segments[breakpoint.segment_2["id"]].plength]])
+                sv.addInfoField("RLENGTH", [bam.reads[bam.segments[breakpoint.segment_2["id"]].qname].length])
                 sv.addInfoField("GAP", [breakpoint.gap])
 
                 if re.match("/2D_2d$/", bam.segments[breakpoint.segment_2["id"]].qname):

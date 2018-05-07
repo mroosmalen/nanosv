@@ -34,6 +34,12 @@ NanoSV needs a working installation of python 3. You can install NanoSV using pi
 ```
 > pip install nanosv
 ```
+
+Alternatively, you can get NanoSV from bioconda:
+```
+conda install -c bioconda nanosv 
+```
+
 ### Citation
 Cretu Stancu, M. *et al.* Mapping and phasing of structural variation in patient genomes using nanopore sequencing. Nat. Commun. 8, 1326 **(2017)**. (https://www.nature.com/articles/s41467-017-01343-4)
 
@@ -170,6 +176,10 @@ pid_flag = 0.80
 gap_flag = 100
 # Filter flag: CIPOS|CIEND, set if the CIPOS|CIEND is larger than specified by this parameter
 ci_flag = 30
+
+[Runtime options]
+# Number of threads to use with sambamba
+sambamba_threads = 1
 ```
 
 #### Ancillary files that can be used for running NanoSV:
