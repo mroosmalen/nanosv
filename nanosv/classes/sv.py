@@ -137,27 +137,28 @@ class SV:
         if self.alt == "INS":
             self.alt = py_vcf.model._SV("INS")
         if self.alt == "BND":
-            if self.flag1 & 16:
-                if self.flag2 & 16:
-                    self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, False, self.ref, True)
-                    if opts_depth_support:
-                        avg_dupdel_cov = self.getDupDelcoverage()
-                        if self.significanceTest(avg_dupdel_cov, True):
-                            self.alt = py_vcf.model._SV("DUP")
-                            self.info['SVTYPE'] = "DUP"
-                        dup = 1
+            if self.chr == self.chr2:
+                if self.flag1 & 16:
+                    if self.flag2 & 16:
+                        self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, False, self.ref, True)
+                        if opts_depth_support:
+                            avg_dupdel_cov = self.getDupDelcoverage()
+                            if self.significanceTest(avg_dupdel_cov, True):
+                                self.alt = py_vcf.model._SV("DUP")
+                                self.info['SVTYPE'] = "DUP"
+                            dup = 1
+                    else:
+                        self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, True, self.ref, True)
                 else:
-                    self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, True, self.ref, True)
-            else:
-                if self.flag2 & 16:
-                    self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), False, False, self.ref, True)
-                else:
-                    self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), False, True, self.ref, True)
-                    if opts_depth_support:
-                        avg_dupdel_cov = self.getDupDelcoverage()
-                        if self.significanceTest(avg_dupdel_cov, False):
-                            self.alt = py_vcf.model._SV("DEL")
-                            self.info['SVTYPE'] = "DEL"
+                    if self.flag2 & 16:
+                        self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), False, False, self.ref, True)
+                    else:
+                        self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), False, True, self.ref, True)
+                        if opts_depth_support:
+                            avg_dupdel_cov = self.getDupDelcoverage()
+                            if self.significanceTest(avg_dupdel_cov, False):
+                                self.alt = py_vcf.model._SV("DEL")
+                                self.info['SVTYPE'] = "DEL"
         gt_lplist = self.bayes_gt(sum(self.format['RO']), sum(self.format['VO']), dup)
         gt_sum = 0
 
