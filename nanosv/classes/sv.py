@@ -4,17 +4,17 @@ import sys
 from math import log10
 from statistics import median
 from version import __version__
+from utils import parse_bam as bam
+from utils import coverage
 
 import collections
 import math
 import os
 import vcf as py_vcf
+import NanoSV
 
-from utils import parse_bam as bam
-from utils import coverage
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-import NanoSV
 
 
 class SV:
@@ -47,6 +47,7 @@ class SV:
         self.breakpoints = [breakpoint.id]
         self.set = 0
         self.SVcluster = 1
+        self.ref_qname_clips = [[], []]
 
     def addBreakpoint(self, breakpoint):
         """
@@ -103,28 +104,29 @@ class SV:
         else:
             self.info["DEPTHPVAL"] = '%.3f' % (teller / len(coverage.coverages))
             return False
-
+    
     def setReferenceBase(self):
         """
         Get the reference bases for the SV object
+        :param
         """
         bases = dict()
-        for pileupcolumn in bam.bam.pileup(self.chr, self.pos-1, self.pos, truncate=True):
+        for pileupcolumn in bam.bam.pileup(self.chr,self.pos-1,self.pos, truncate=True):
             for pileupread in pileupcolumn.pileups:
                 if not pileupread.is_del and not pileupread.is_refskip:
                     if not pileupread.alignment.query_sequence[pileupread.query_position] in bases:
                         bases[pileupread.alignment.query_sequence[pileupread.query_position]] = 0
                     bases[pileupread.alignment.query_sequence[pileupread.query_position]] += 1
-        if len(bases.keys()) > 0:
-            self.ref = sorted(bases, key=bases.__getitem__)[-1]
-
+        if (len(bases.keys()) > 0):
+            self.ref = sorted(bases, key=bases.__getitem__)[-1]   
+    
     def setArguments(self, opts_depth_support):
         """
         Set standard info field arguments.
         :param opts_depth_support is a boolean for if the coverage dup/del analysis is switched on:
         """
-        self.info['CIPOS'] = [ int(min(self.pos) - median(self.pos)), int(max(self.pos) - median(self.pos)) ]
-        self.info['CIEND'] = [ int(min(self.info['END']) - median(self.info['END'])), int(max(self.info['END']) - median(self.info['END'])) ]
+        self.info['CIPOS'] = [int(min(self.pos) - median(self.pos)), int(max(self.pos) - median(self.pos))]
+        self.info['CIEND'] = [int(min(self.info['END']) - median(self.info['END'])), int(max(self.info['END']) - median(self.info['END']))]
         if self.info['CIPOS'] == [0,0] and self.info['CIEND'] == [0,0]:
             del self.info['IMPRECISE']
         self.pos = int(median(self.pos))
@@ -160,34 +162,34 @@ class SV:
                             self.info['SVTYPE'] = "DEL"
         gt_lplist = self.bayes_gt(sum(self.format['RO']), sum(self.format['VO']), dup)
         gt_sum = 0
-
+        
         pplist = []
         for gt in gt_lplist:
-            pplist.append(10 ** gt)
+            pplist.append( 10 ** gt )
             gt_sum += 10 ** gt
-
+        
         if gt_sum > 0:
             npplist = [x / gt_sum for x in pplist]
-
+            
             plplist = []
             for p in npplist:
                 if p > 0:
-                    plplist.append(int(-10 * log10(p)))
+                    plplist.append( int( -10 * log10( p ) ) )
                 else:
-                    plplist.append(9999)
-
+                    plplist.append( 9999 )
+            
             gt_idx = plplist.index(min(plplist))
             gq_idx = plplist.index(sorted(plplist)[1])
-
+            
             plplist[gt_idx] = 0
-
+            
             if gt_idx == 0:
                 self.format['GT'] = '0/0'
             elif gt_idx == 1:
                 self.format['GT'] = '0/1'
             elif gt_idx == 2:
                 self.format['GT'] = '1/1'
-
+            
             self.format['PL'] = plplist
             self.format['GQ'] = plplist[gq_idx]
             self.qual = plplist[0]
@@ -196,7 +198,7 @@ class SV:
             self.format['PL'] = [0, 0, 0]
             self.format['GQ'] = [0]
             self.qual = 0
-
+            
         self.set = 1
 
     def getDupDelcoverage(self):
@@ -211,12 +213,12 @@ class SV:
             stop = round(self.pos)
         position = str(self.chr) + ":" + str(start) + "-" + str(stop)
         dupdel_coverages = []
-
+        
         if 'sambamba' in NanoSV.opts_sambamba:
-            cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " --nthreads=" + NanoSV.opts_threads + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
+            cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
         elif 'samtools' in NanoSV.opts_sambamba:
-            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{print $3}'"
-
+            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{if (NR!=1) print $3}'"
+        
         with os.popen(cmd) as commandoutput:
             for line in commandoutput:
                 dupdel_coverages.append(float(line.rstrip()))
@@ -249,7 +251,6 @@ class SV:
         """
         # probability of seeing an alt read with true genotype of of hom_ref, het, hom_alt respectively
         if is_dup:  # specialized logic to handle non-destructive events such as duplications
-            #p_alt = [1e-2, 1 / 3.0, 0.5]
             p_alt = [1e-3, 0.5, 0.9]
         else:
             p_alt = [1e-3, 0.5, 0.9]
@@ -271,12 +272,9 @@ class SV:
             if field == "RT":
                 rt = [0, 0, 0]
                 for type in self.info[field]:
-                    if type == "2d":
-                        rt[0] += 1
-                    if type == "template":
-                        rt[1] += 1
-                    if type == "complement":
-                        rt[2] += 1
+                    if type == "2d": rt[0] += 1
+                    if type == "template": rt[1] += 1
+                    if type == "complement": rt[2] += 1
                 self.info[field] = rt
             elif isinstance(self.info[field], list):
                 if isinstance(self.info[field][0], list):
@@ -289,7 +287,7 @@ class SV:
                         self.info[field][0] = round(self.info[field][0], 3)
                         self.info[field][1] = round(self.info[field][1], 3)
                 else:
-                    if 'CI' not in field:
+                    if not 'CI' in field:
                         self.info[field] = self.median_type(self.info[field])
 
     def median_type(self, toCalculate):
@@ -314,9 +312,8 @@ class SV:
         format_list.remove('GT')
         format_list.insert(0, 'GT')
         format = ':'.join(format_list)
-
-        data = collections.namedtuple('CallData', format_list)(**self.format)
-        call = py_vcf.model._Call('site', bam.sample_name, data)
+       
+        call = py_vcf.model._Call('site', bam.sample_name, collections.namedtuple('CallData', format_list)(**self.format))
         samples_indexes = [0]
         samples = [call]
         return [format, samples_indexes, samples]
@@ -329,8 +326,6 @@ class SV:
         format_output = self.setFormat()
         if isinstance(self.alt, py_vcf.model._Breakend):
             del self.info['END']
-        record = py_vcf.model._Record(self.chr, self.pos, self.id, self.ref,
-                                      [self.alt], self.qual, self.filter,
-                                      self.info, format_output[0],
-                                      format_output[1], format_output[2])
+        record = py_vcf.model._Record(self.chr, self.pos, self.id, self.ref, [self.alt], self.qual, self.filter,
+                                      self.info, format_output[0], format_output[1], format_output[2])
         vcf_writer.write_record(record)

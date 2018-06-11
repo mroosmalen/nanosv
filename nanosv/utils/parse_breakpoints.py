@@ -3,15 +3,14 @@ import re
 import sys
 import time
 import os
+import NanoSV
 
 from collections import defaultdict
-
 from classes import sv as svclass
 from utils import parse_reads as read
 from utils import parse_bam as bam
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-import NanoSV
 
 svID = 1
 structural_variants = {}
@@ -26,8 +25,8 @@ def addSVInfo(sv):
     """
     if sum(sv.format['DV']) >= NanoSV.opts_cluster_count * 2:
         flag_list = [sv.flag1, sv.flag2]
-        for flag_idx in range(len(flag_list)):
-            if (flag_idx == 0 and not flag_list[flag_idx] & 16) or (flag_idx == 1 and flag_list[flag_idx] & 16):
+        for flag_idx in range(len(flag_list)):            
+            if ( flag_idx == 0 and not flag_list[flag_idx] & 16 ) or ( flag_idx == 1 and flag_list[flag_idx] & 16 ):
                 head_tail = 'T'
             else:
                 head_tail = 'H'
@@ -39,16 +38,15 @@ def addSVInfo(sv):
                     break
                 for hanging_id in read.hanging_breakpoints_region[sv.chr][head_tail][hanging_pos]:
                     segment_id = read.hanging_breakpoints_region[sv.chr][head_tail][hanging_pos][hanging_id]
-                    if segment_id == 0: continue
                     sv.format['HR'][flag_idx] += 1
-                    sv.format['VO'][flag_idx] += (1 - 10 ** (-bam.segments[segment_id].mapq / 10.0))
-                    sv.addInfoField("PID", [[bam.segments[segment_id].pid], None])
-                    sv.addInfoField("MAPQ", [[bam.segments[segment_id].mapq], None])
-                    sv.addInfoField("PLENGTH", [[bam.segments[segment_id].plength], None])
-                    sv.addInfoField("RLENGTH", [bam.reads[bam.segments[segment_id].qname].length])
-                    if re.match("/2D_2d$/", bam.segments[segment_id].qname):
+                    sv.format['VO'][flag_idx] += (1 - 10 ** (-bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].mapq / 10.0))
+                    sv.addInfoField("PID", [[bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].pid], None])
+                    sv.addInfoField("MAPQ", [[bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].mapq], None])
+                    sv.addInfoField("PLENGTH", [[bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].plength], None])
+                    sv.addInfoField("RLENGTH", [bam.reads[bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].qname].length])
+                    if re.match("/2D_2d$/", bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].qname):
                         sv.addInfoField("RT", ["2d"])
-                    elif re.match("/2D_complement$/", bam.segments[segment_id].qname):
+                    elif re.match("/2D_complement$/", bam.segments[segment_id[0]][segment_id[1]][segment_id[2]].qname):
                         sv.addInfoField("RT", ["complement"])
                     else:
                         sv.addInfoField("RT", ["template"])
@@ -78,16 +76,17 @@ def parse_breakpoints_2(breakpoints_region_2):
                     addSVInfo(sv)
                     sv = svclass.SV(svID, breakpoint)
                     svID += 1
-
-                sv.addInfoField("PID", [[bam.segments[breakpoint.segment_1["id"]].pid], [bam.segments[breakpoint.segment_2["id"]].pid]])
-                sv.addInfoField("MAPQ", [ [bam.segments[breakpoint.segment_1["id"]].mapq], [bam.segments[breakpoint.segment_2["id"]].mapq]])
-                sv.addInfoField("PLENGTH", [[bam.segments[breakpoint.segment_1["id"]].plength], [bam.segments[breakpoint.segment_2["id"]].plength]])
-                sv.addInfoField("RLENGTH", [bam.reads[bam.segments[breakpoint.segment_2["id"]].qname].length])
+                segment_id1 = breakpoint.segment_1["id"]
+                segment_id2 = breakpoint.segment_2["id"]
+                sv.addInfoField("PID",[ [bam.segments[segment_id1[0]][segment_id1[1]][segment_id1[2]].pid],[bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].pid] ])
+                sv.addInfoField("MAPQ",[ [bam.segments[segment_id1[0]][segment_id1[1]][segment_id1[2]].mapq],[bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].mapq] ])
+                sv.addInfoField("PLENGTH",[ [bam.segments[segment_id1[0]][segment_id1[1]][segment_id1[2]].plength],[bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].plength] ])
+                sv.addInfoField("RLENGTH",[ bam.reads[bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].qname].length ])
                 sv.addInfoField("GAP", [breakpoint.gap])
 
-                if re.match("/2D_2d$/", bam.segments[breakpoint.segment_2["id"]].qname):
+                if re.match("/2D_2d$/", bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].qname):
                     sv.addInfoField("RT", ["2d"])
-                elif re.match("/2D_complement$/", bam.segments[breakpoint.segment_2["id"]].qname):
+                elif re.match("/2D_complement$/", bam.segments[segment_id2[0]][segment_id2[1]][segment_id2[2]].qname):
                     sv.addInfoField("RT", ["complement"])
                 else:
                     sv.addInfoField("RT", ["template"])

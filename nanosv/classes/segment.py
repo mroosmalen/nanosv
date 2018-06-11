@@ -2,8 +2,8 @@
 
 
 class Segment:
-    def __init__(self, id, qname, flag, rname, pos, mapq, length):
-        self.id = id
+    def __init__(self, qname, flag, rname, pos, mapq, length, clip, clip_2, pid):
+        self.id = [rname, pos, qname + ";" + str(clip)]
         self.qname = qname
         self.flag = int(flag)
         self.rname = rname
@@ -11,9 +11,9 @@ class Segment:
         self.mapq = int(mapq)
         self.length = int(length)
         self.end = (int(pos) + int(length))
-        self.clip = False
-        self.clip_2 = False
-        self.pid = False
+        self.clip = clip
+        self.clip_2 = clip_2
+        self.pid = pid
 
     def setPlength(self, rlength):
         """
