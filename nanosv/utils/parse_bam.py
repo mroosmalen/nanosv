@@ -80,52 +80,57 @@ def parse_chr_bam(q, bamfile):
     """
     global tmp_variants, segments_to_check
     
-    contig = q.get()
-    F=pysam.AlignmentFile(bamfile, 'rb')
-    Alignment = F.fetch(contig, multiple_iterators=True)
-                
-    previous_refname = -1
-    previous_cursor = -1
-    for line in Alignment:
-        if line.flag & 4:
-            continue
-        if segmentID % 100 == 0:
-            sys.stderr.write(time.strftime("%c") + " " + str(segmentID) + " reads loaded\n")
-        remove = [qname_clip for qname_clip in segments_to_check if line.reference_start > segments_to_check[qname_clip][1]]
-        for q_clip in remove: del segments_to_check[q_clip]
-        if line.query_name in reads:
-            read = reads[line.query_name]
-        else:
-            read = r.Read(line.query_name, line.infer_read_length())
-            reads[line.query_name] = read
-        clip, clip_2 = calculate_clip(line)
-        created_subsegments = search_for_indels(line, clip, clip_2)
-        for segment in created_subsegments:
-            if segment.rname != previous_refname:
-                if NanoSV.opts_phasing_on:
-                    tmp_variants = {}
-                segments[segment.rname] = {}
-            if not int(segment.pos) in segments[segment.rname]:
-                segments[segment.rname][segment.pos] = {}
-            read.addSegment(segment)
-            segments[segment.rname][segment.pos][segment.id[-1]] = segment
-            segments_to_check[segment.id[-1]] = [segment.pos, segment.end]
-            previous_refname = line.reference_name
-        if NanoSV.opts_phasing_on and line.seq and line.query_qualities:
-            if line.has_tag('MD'):
-                if not NanoSV.opts_snp_file:
-                    find_variations_md(line.cigartuples, line.reference_name, line.reference_start + 1, line.query_qualities, line.seq, line.get_tag('MD'), created_subsegments)
+    while True:
+        try:
+            contig = q.get()
+        except q.Empty:
+            break
+        F=pysam.AlignmentFile(bamfile, 'rb')
+        Alignment = F.fetch(contig, multiple_iterators=True)
+                    
+        previous_refname = -1
+        previous_cursor = -1
+        for line in Alignment:
+            if line.flag & 4:
+                continue
+            if segmentID % 100 == 0:
+                sys.stderr.write(time.strftime("%c") + " " + str(segmentID) + " reads loaded\n")
+            remove = [qname_clip for qname_clip in segments_to_check if line.reference_start > segments_to_check[qname_clip][1]]
+            for q_clip in remove: del segments_to_check[q_clip]
+            if line.query_name in reads:
+                read = reads[line.query_name]
             else:
-                if not NanoSV.opts_snp_file:
-                    find_variations_cigar(line.cigartuples, line.reference_name, line.reference_start + 1, line.query_qualities, line.seq, created_subsegments)
-        if previous_cursor == -1:
+                read = r.Read(line.query_name, line.infer_read_length())
+                reads[line.query_name] = read
+            clip, clip_2 = calculate_clip(line)
+            created_subsegments = search_for_indels(line, clip, clip_2)
+            for segment in created_subsegments:
+                if segment.rname != previous_refname:
+                    if NanoSV.opts_phasing_on:
+                        tmp_variants = {}
+                    segments[segment.rname] = {}
+                if not int(segment.pos) in segments[segment.rname]:
+                    segments[segment.rname][segment.pos] = {}
+                read.addSegment(segment)
+                segments[segment.rname][segment.pos][segment.id[-1]] = segment
+                segments_to_check[segment.id[-1]] = [segment.pos, segment.end]
+                previous_refname = line.reference_name
+            if NanoSV.opts_phasing_on and line.seq and line.query_qualities:
+                if line.has_tag('MD'):
+                    if not NanoSV.opts_snp_file:
+                        find_variations_md(line.cigartuples, line.reference_name, line.reference_start + 1, line.query_qualities, line.seq, line.get_tag('MD'), created_subsegments)
+                else:
+                    if not NanoSV.opts_snp_file:
+                        find_variations_cigar(line.cigartuples, line.reference_name, line.reference_start + 1, line.query_qualities, line.seq, created_subsegments)
+            if previous_cursor == -1:
+                previous_cursor = line.reference_start
+            if NanoSV.opts_phasing_on and line.seq and line.query_qualities and line.reference_start > previous_cursor:
+                remove_variations(previous_cursor, line.reference_start, line.reference_name)
             previous_cursor = line.reference_start
-        if NanoSV.opts_phasing_on and line.seq and line.query_qualities and line.reference_start > previous_cursor:
-            remove_variations(previous_cursor, line.reference_start, line.reference_name)
-        previous_cursor = line.reference_start
-    if NanoSV.opts_phasing_on and NanoSV.opts_snp_file:
-        read_snp_vcf()
-    write_bed()
+        if NanoSV.opts_phasing_on and NanoSV.opts_snp_file:
+            read_snp_vcf()
+        write_bed()
+        
     
 
 
