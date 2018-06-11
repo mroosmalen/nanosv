@@ -5,6 +5,7 @@ import sys
 import time
 import os
 import NanoSV
+import multiprocessing as mp
 
 from classes import read as r
 from classes import segment as s
@@ -43,17 +44,53 @@ def parse_bam():
             sample_name = header['RG']['SM']
     else:
         sample_name = re.sub('(\.sorted)?\.bam$', '', str(NanoSV.opts_bam))
-    for item in bam.header["SQ"]:
+    for item in header["SQ"]:
         variants[item['SN']] = {}
         for bin in range(0,int(item['LN']/NanoSV.opts_variant_bin_size)):
             variants[item['SN']][bin] = {}
+            
+    contig_list = []
+    for contig_dict in header['SQ']:
+        contig_list.append(contig_dict['SN'])
+    bam.close()
+    
+    q = mp.Queue()
+    for contig in contig_list:
+        q.put(contig)
+    #######
+    threads = 4
+    #######
+    processes = [mp.Process(target=parse_chr_bam, args=(q,bamfile)) for x in range(threads)]
+    
+    for p in processes:
+        p.start()
+        
+    for p in processes:
+        p.join()
+            
+     
+     
+     
+     
+
+
+def parse_chr_bam(q, bamfile):
+    """
+    Reachs each alignment for each chromosome. Separate for multiprocessing
+    """
+    global tmp_variants, segments_to_check
+    
+    contig = q.get()
+    F=pysam.AlignmentFile(bamfile, 'rb')
+    Alignment = F.fetch(contig, multiple_iterators=True)
+                
     previous_refname = -1
     previous_cursor = -1
-    for line in bam:
+    for line in Alignment:
         if line.flag & 4:
             continue
         if segmentID % 100 == 0:
-            sys.stderr.write(time.strftime("%c") + " " + str(segmentID) + " reads geladen\n")
+            sys.stderr.write(time.strftime("%c") + " " + str(segmentID) + " reads loaded\n")
         remove = [qname_clip for qname_clip in segments_to_check if line.reference_start > segments_to_check[qname_clip][1]]
         for q_clip in remove: del segments_to_check[q_clip]
         if line.query_name in reads:
@@ -89,6 +126,9 @@ def parse_bam():
     if NanoSV.opts_phasing_on and NanoSV.opts_snp_file:
         read_snp_vcf()
     write_bed()
+    
+
+
 
 
 def calculate_pid(line, query_alignment_length):
@@ -490,3 +530,4 @@ def write_bed():
                 for position, object in variants[chromosome][bin].items():
                     string = str(chromosome) + "\t" + str(position)
                     bedfile.write(string)
+                    
