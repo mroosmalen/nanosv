@@ -2,9 +2,10 @@
 
 
 class Segment:
-    def __init__(self, qname, flag, rname, pos, mapq, length, clip, clip_2, pid):
+    def __init__(self, qname, flag, rname, pos, mapq, length, clip, clip_2, pid, rlength):
         self.id = [rname, pos, qname + ";" + str(clip)]
         self.qname = qname
+        self.rlength = rlength
         self.flag = int(flag)
         self.rname = rname
         self.pos = int(pos)

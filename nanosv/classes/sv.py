@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import pysam
 
 from math import log10
 from statistics import median
@@ -104,22 +105,23 @@ class SV:
         else:
             self.info["DEPTHPVAL"] = '%.3f' % (teller / len(coverage.coverages))
             return False
-    
+
     def setReferenceBase(self):
         """
         Get the reference bases for the SV object
         :param
         """
         bases = dict()
-        for pileupcolumn in bam.bam.pileup(self.chr,self.pos-1,self.pos, truncate=True):
+        bam = pysam.AlignmentFile(NanoSV.opts_bam, 'rb')
+        for pileupcolumn in bam.pileup(self.chr,self.pos-1,self.pos, truncate=True):
             for pileupread in pileupcolumn.pileups:
                 if not pileupread.is_del and not pileupread.is_refskip:
                     if not pileupread.alignment.query_sequence[pileupread.query_position] in bases:
                         bases[pileupread.alignment.query_sequence[pileupread.query_position]] = 0
                     bases[pileupread.alignment.query_sequence[pileupread.query_position]] += 1
         if (len(bases.keys()) > 0):
-            self.ref = sorted(bases, key=bases.__getitem__)[-1]   
-    
+            self.ref = sorted(bases, key=bases.__getitem__)[-1]
+
     def setArguments(self, opts_depth_support):
         """
         Set standard info field arguments.
@@ -162,34 +164,34 @@ class SV:
                             self.info['SVTYPE'] = "DEL"
         gt_lplist = self.bayes_gt(sum(self.format['RO']), sum(self.format['VO']), dup)
         gt_sum = 0
-        
+
         pplist = []
         for gt in gt_lplist:
             pplist.append( 10 ** gt )
             gt_sum += 10 ** gt
-        
+
         if gt_sum > 0:
             npplist = [x / gt_sum for x in pplist]
-            
+
             plplist = []
             for p in npplist:
                 if p > 0:
                     plplist.append( int( -10 * log10( p ) ) )
                 else:
                     plplist.append( 9999 )
-            
+
             gt_idx = plplist.index(min(plplist))
             gq_idx = plplist.index(sorted(plplist)[1])
-            
+
             plplist[gt_idx] = 0
-            
+
             if gt_idx == 0:
                 self.format['GT'] = '0/0'
             elif gt_idx == 1:
                 self.format['GT'] = '0/1'
             elif gt_idx == 2:
                 self.format['GT'] = '1/1'
-            
+
             self.format['PL'] = plplist
             self.format['GQ'] = plplist[gq_idx]
             self.qual = plplist[0]
@@ -198,7 +200,7 @@ class SV:
             self.format['PL'] = [0, 0, 0]
             self.format['GQ'] = [0]
             self.qual = 0
-            
+
         self.set = 1
 
     def getDupDelcoverage(self):
@@ -213,12 +215,12 @@ class SV:
             stop = round(self.pos)
         position = str(self.chr) + ":" + str(start) + "-" + str(stop)
         dupdel_coverages = []
-        
+
         if 'sambamba' in NanoSV.opts_sambamba:
             cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
         elif 'samtools' in NanoSV.opts_sambamba:
             cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{if (NR!=1) print $3}'"
-        
+
         with os.popen(cmd) as commandoutput:
             for line in commandoutput:
                 dupdel_coverages.append(float(line.rstrip()))
@@ -312,7 +314,7 @@ class SV:
         format_list.remove('GT')
         format_list.insert(0, 'GT')
         format = ':'.join(format_list)
-       
+
         call = py_vcf.model._Call('site', bam.sample_name, collections.namedtuple('CallData', format_list)(**self.format))
         samples_indexes = [0]
         samples = [call]

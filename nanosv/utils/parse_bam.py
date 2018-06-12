@@ -6,6 +6,8 @@ import time
 import os
 import NanoSV
 import multiprocessing as mp
+import queue
+
 
 from classes import read as r
 from classes import segment as s
@@ -13,22 +15,18 @@ from classes import variant as v
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
-
-coverages = []
-reads = {}
 segments = {}
-tmp_variants = {}
 variants = {}
-segments_to_check = {}
-
+reads = {}
+coverages = []
 
 def parse_bam():
     """
     Reads bam file and saves reads and their segments in objects of the Read en Segment classes.
     :param bamfile used to open bam file:
     """
-    global sample_name, header, segmentID, bam, tmp_variants, segments_to_check
-    segmentID = 1
+    global sample_name, header, bam
+
     sys.stderr.write(time.strftime("%c") + " Busy with parsing bam file...\n")
     bam = pysam.AlignmentFile(NanoSV.opts_bam, 'rb')
     header = bam.header
@@ -44,74 +42,92 @@ def parse_bam():
             sample_name = header['RG']['SM']
     else:
         sample_name = re.sub('(\.sorted)?\.bam$', '', str(NanoSV.opts_bam))
-    for item in header["SQ"]:
-        variants[item['SN']] = {}
-        for bin in range(0,int(item['LN']/NanoSV.opts_variant_bin_size)):
-            variants[item['SN']][bin] = {}
-            
+
     contig_list = []
     for contig_dict in header['SQ']:
         contig_list.append(contig_dict['SN'])
     bam.close()
-    
+
     q = mp.Queue()
+    q_out = mp.Queue()
     for contig in contig_list:
         q.put(contig)
     #######
     threads = 4
     #######
-    processes = [mp.Process(target=parse_chr_bam, args=(q,bamfile)) for x in range(threads)]
-    
+    processes = [mp.Process(target=parse_chr_bam, args=(q, q_out, NanoSV.opts_bam)) for x in range(threads)]
+
     for p in processes:
         p.start()
-        
+
     for p in processes:
         p.join()
-            
-     
-     
-     
-     
 
+    while True:
+        try:
+            contig_segments, contig_variants = q_out.get(block=False, timeout=1)
+            segments.update(contig_segments)
+            variants.update(contig_variants)
+        except queue.Empty:
+            break
+    for contig in segments:
+        for pos in segments[contig]:
+            for id in segments[contig][pos]:
+                segment = segments[contig][pos][id]
+                if segment.qname in reads:
+                    read = read = reads[segment.qname]
+                else:
+                    read = r.Read(segment.qname, segment.rlength)
+                    reads[segment.qname] = read
+                read.addSegment(segment)
+#    print( variants )
 
-def parse_chr_bam(q, bamfile):
+def parse_chr_bam(q, q_out, bamfile):
     """
     Reachs each alignment for each chromosome. Separate for multiprocessing
     """
-    global tmp_variants, segments_to_check
-    
+    global segments_to_check, segments, variants, tmp_variants
+
     while True:
+
         try:
-            contig = q.get()
-        except q.Empty:
+            contig = q.get(block=False, timeout=1)
+        except queue.Empty:
             break
+
+        tmp_variants = {}
+        segments = {contig: {}}
+
+        segments_to_check = {}
+        variants = {}
+
+        for item in header["SQ"]:
+            if item['SN'] == contig:
+                variants[item['SN']] = {}
+                for bin in range(0,int(item['LN']/NanoSV.opts_variant_bin_size)):
+                    variants[item['SN']][bin] = {}
+
         F=pysam.AlignmentFile(bamfile, 'rb')
         Alignment = F.fetch(contig, multiple_iterators=True)
-                    
+
         previous_refname = -1
         previous_cursor = -1
         for line in Alignment:
             if line.flag & 4:
                 continue
-            if segmentID % 100 == 0:
-                sys.stderr.write(time.strftime("%c") + " " + str(segmentID) + " reads loaded\n")
             remove = [qname_clip for qname_clip in segments_to_check if line.reference_start > segments_to_check[qname_clip][1]]
             for q_clip in remove: del segments_to_check[q_clip]
-            if line.query_name in reads:
-                read = reads[line.query_name]
-            else:
-                read = r.Read(line.query_name, line.infer_read_length())
-                reads[line.query_name] = read
+#            if line.query_name in reads:
+#                read = reads[line.query_name]
+#            else:
+#                read = r.Read(line.query_name, line.infer_read_length())
+#                reads[line.query_name] = read
             clip, clip_2 = calculate_clip(line)
             created_subsegments = search_for_indels(line, clip, clip_2)
             for segment in created_subsegments:
-                if segment.rname != previous_refname:
-                    if NanoSV.opts_phasing_on:
-                        tmp_variants = {}
-                    segments[segment.rname] = {}
                 if not int(segment.pos) in segments[segment.rname]:
                     segments[segment.rname][segment.pos] = {}
-                read.addSegment(segment)
+#                read.addSegment(segment)
                 segments[segment.rname][segment.pos][segment.id[-1]] = segment
                 segments_to_check[segment.id[-1]] = [segment.pos, segment.end]
                 previous_refname = line.reference_name
@@ -130,18 +146,18 @@ def parse_chr_bam(q, bamfile):
         if NanoSV.opts_phasing_on and NanoSV.opts_snp_file:
             read_snp_vcf()
         write_bed()
-        
-    
-
+        F.close()
+        q_out.put([segments,variants])
+#        print( contig, reads )
 
 
 
 def calculate_pid(line, query_alignment_length):
     """
     calculates percentage identity of alignment of read
-    :param line: 
-    :param query_alignment_length: 
-    :return pid: 
+    :param line:
+    :param query_alignment_length:
+    :return pid:
     """
     if line.has_tag('MD'):
         matches = sum(map(int, re.findall(r"(\d+)", line.get_tag('MD'))))
@@ -156,8 +172,8 @@ def calculate_pid(line, query_alignment_length):
 def calculate_clip(line):
     """
     calculates clip of segment
-    :param line: 
-    :return list with clip of both sides of the segment: 
+    :param line:
+    :return list with clip of both sides of the segment:
     """
     if line.flag & 16:
         if line.cigartuples[-1][0] == 5 or line.cigartuples[-1][0] == 4:
@@ -183,7 +199,7 @@ def calculate_clip(line):
 def create_pattern():
     """
     creates a pattern to search for deletions and indels in cigar string using regular expressions
-    :return pattern to search for with re.finditer(): 
+    :return pattern to search for with re.finditer():
     """
     pattern_list = [''] * len(NanoSV.opts_min_indel_size)
     for i in range(0, len(NanoSV.opts_min_indel_size)):
@@ -202,10 +218,10 @@ def search_for_indels(line, clip, clip_2):
     """
     Looks for indels that could be broken up to create breakpoints. Breakpoints are detected by NanoSV
     (Gapped alignment fix)
-    :param line: 
-    :param clip: 
-    :param clip_2: 
-    :return list of created subsegments: 
+    :param line:
+    :param clip:
+    :param clip_2:
+    :return list of created subsegments:
     """
     cigarstring = line.cigarstring
     reference_start = line.reference_start + 1
@@ -263,7 +279,7 @@ def search_for_indels(line, clip, clip_2):
                 reference_start += int(m.group(1))
             c_start = m.end(0)
             continue
-        segment = s.Segment(line.query_name, line.flag, line.reference_name, reference_start, line.mapping_quality, query_alignment_length, clip, clip_2, pid)
+        segment = s.Segment(line.query_name, line.flag, line.reference_name, reference_start, line.mapping_quality, query_alignment_length, clip, clip_2, pid, line.infer_read_length())
         segment.end = reference_end
         created_subsegments.append(segment)
         reference_start = int(reference_end) + 1
@@ -296,7 +312,7 @@ def search_for_indels(line, clip, clip_2):
             query_alignment_length = line_query_alignment_length
     pid = keep_segment(line, query_alignment_length)
     if pid:
-        segment = s.Segment(line.query_name, line.flag, line.reference_name, reference_start, line.mapping_quality, query_alignment_length, clip, clip_2, pid)
+        segment = s.Segment(line.query_name, line.flag, line.reference_name, reference_start, line.mapping_quality, query_alignment_length, clip, clip_2, pid, line.infer_read_length())
         segment.end = reference_end
         created_subsegments.append(segment)
     return created_subsegments
@@ -318,8 +334,8 @@ def read_snp_vcf():
 def find_SNPs(chromosome, snp_position):
     """
     Looks for SNPs on given position in the genome using pileup.
-    :param chromosome: 
-    :param snp_position: 
+    :param chromosome:
+    :param snp_position:
     """
     base_ratios = {'A': [0, 0], 'C': [0, 0], 'G': [0, 0], 'T': [0, 0], '=': [0, 0]}
     deletions = 0
@@ -355,9 +371,9 @@ def find_SNPs(chromosome, snp_position):
 def keep_segment(line, query_alignment_length):
     """
     Calls calculate_pid() and checks if pid meets requirement to use read in NanoSV. If so, returns pid; else False
-    :param line: 
-    :param query_alignment_length: 
-    :return pid: 
+    :param line:
+    :param query_alignment_length:
+    :return pid:
     """
     if line.mapping_quality < NanoSV.opts_min_mapq:
         return False
@@ -370,13 +386,13 @@ def keep_segment(line, query_alignment_length):
 def find_variations_md(cigartuples, chromosome, pos, qual, seq, md, subsegments):
     """
     Loops through read to find variant base. This function is used with BWA-MEM, Minimap2 and NGMLR bam files
-    :param cigartuples: 
-    :param chromosome: 
-    :param pos: 
-    :param qual: 
-    :param seq: 
-    :param md: 
-    :param subsegments: 
+    :param cigartuples:
+    :param chromosome:
+    :param pos:
+    :param qual:
+    :param seq:
+    :param md:
+    :param subsegments:
     """
     global tmp_variants
     md_tag = re.split("\^\D+", md)
@@ -426,12 +442,12 @@ def find_variations_md(cigartuples, chromosome, pos, qual, seq, md, subsegments)
 def find_variations_cigar(cigartuples, chromosome, pos, qual, seq, subsegments):
     """
     Loops through read to find variant base. This function is used with LAST bam files
-    :param cigartuples: 
-    :param chromosome: 
-    :param pos: 
-    :param qual: 
-    :param seq: 
-    :param subsegments: 
+    :param cigartuples:
+    :param chromosome:
+    :param pos:
+    :param qual:
+    :param seq:
+    :param subsegments:
     """
     global tmp_variants
     ref_cursor = (int(pos))
@@ -471,11 +487,11 @@ def find_variations_cigar(cigartuples, chromosome, pos, qual, seq, subsegments):
 
 def remove_variations(start, end, chr):
     """
-    Checks saved variants on position when all reads of that position are parsed. If a variant meets all selection 
+    Checks saved variants on position when all reads of that position are parsed. If a variant meets all selection
     requirements it is kept, otherwise deleted
-    :param start: 
-    :param end: 
-    :param chr: 
+    :param start:
+    :param end:
+    :param chr:
     """
     global tmp_variants, variants, segments_to_check
     for position in sorted(tmp_variants):
@@ -535,4 +551,3 @@ def write_bed():
                 for position, object in variants[chromosome][bin].items():
                     string = str(chromosome) + "\t" + str(position)
                     bedfile.write(string)
-                    
