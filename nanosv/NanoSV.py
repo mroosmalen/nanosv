@@ -8,6 +8,7 @@ import utils
 parser = argparse.ArgumentParser()
 parser = argparse.ArgumentParser(description='Put here a description.')
 parser.add_argument('bam', help='/path/to/file.bam')
+parser.add_argument('-t', '--threads', default=4, type=int, help='Number of threads [default: 4]')
 parser.add_argument('-s','--sambamba', default='sambamba',type=str,help=' Give the full path to the sambamba or samtools executable [default: sambamba ]')
 parser.add_argument('-c','--config', default=os.path.dirname(os.path.abspath(__file__))+"/config.ini",type=str,help='Give the full path to your own ini file [ default: config.ini ]')
 parser.add_argument('-b','--bed', default=os.path.dirname(os.path.abspath(__file__))+"/bedfiles/human_hg19.bed",type=str,help=' Give the full path to your own bed file, used for coverage depth calculations [default: human_hg19.bed ]')
@@ -15,8 +16,9 @@ parser.add_argument('-o','--output',default=sys.stdout,type=argparse.FileType('w
 parser.add_argument('-f', '--snp_file', default=False, type=str, help='Give full path to the SNP variant file for phasing. Supporting file formats: BED and VCF')
 args = parser.parse_args()
 
-opts_bam = args.bam    
+opts_bam = args.bam
 opts_bed = args.bed
+opts_threads = args.threads
 opts_sambamba = args.sambamba
 opts_output = args.output
 opts_snp_file = args.snp_file
@@ -62,13 +64,13 @@ def main():
         utils.coverage.calculate_coverage_bed()
     else:
         coverages = []
-    
+
     utils.parse_bam.parse_bam()
-    
+
     utils.create_vcf.print_vcf_header()
-    
+
     utils.parse_reads.parse_reads()
-    
+
     utils.parse_breakpoints.parse_breakpoints()
 
     utils.parse_svs.parse_svs()

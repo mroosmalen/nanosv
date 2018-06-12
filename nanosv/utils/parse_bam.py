@@ -52,24 +52,30 @@ def parse_bam():
     q_out = mp.Queue()
     for contig in contig_list:
         q.put(contig)
-    #######
-    threads = 4
-    #######
-    processes = [mp.Process(target=parse_chr_bam, args=(q, q_out, NanoSV.opts_bam)) for x in range(threads)]
+
+    processes = [mp.Process(target=parse_chr_bam, args=(q, q_out, NanoSV.opts_bam)) for x in range(NanoSV.opts_threads)]
 
     for p in processes:
         p.start()
 
+    liveprocs = list(processes)
+    while liveprocs:
+        try:
+            while 1:
+                contig_segments, contig_variants = q_out.get(block=False, timeout=1)
+                segments.update(contig_segments)
+                variants.update(contig_variants)
+        except queue.Empty:
+            pass
+
+        time.sleep(0.5)    # Give tasks a chance to put more data in
+        if not q.empty():
+            continue
+        liveprocs = [p for p in liveprocs if p.is_alive()]
+
     for p in processes:
         p.join()
 
-    while True:
-        try:
-            contig_segments, contig_variants = q_out.get(block=False, timeout=1)
-            segments.update(contig_segments)
-            variants.update(contig_variants)
-        except queue.Empty:
-            break
     for contig in segments:
         for pos in segments[contig]:
             for id in segments[contig][pos]:
@@ -80,7 +86,6 @@ def parse_bam():
                     read = r.Read(segment.qname, segment.rlength)
                     reads[segment.qname] = read
                 read.addSegment(segment)
-#    print( variants )
 
 def parse_chr_bam(q, q_out, bamfile):
     """
@@ -117,17 +122,12 @@ def parse_chr_bam(q, q_out, bamfile):
                 continue
             remove = [qname_clip for qname_clip in segments_to_check if line.reference_start > segments_to_check[qname_clip][1]]
             for q_clip in remove: del segments_to_check[q_clip]
-#            if line.query_name in reads:
-#                read = reads[line.query_name]
-#            else:
-#                read = r.Read(line.query_name, line.infer_read_length())
-#                reads[line.query_name] = read
             clip, clip_2 = calculate_clip(line)
             created_subsegments = search_for_indels(line, clip, clip_2)
             for segment in created_subsegments:
                 if not int(segment.pos) in segments[segment.rname]:
                     segments[segment.rname][segment.pos] = {}
-#                read.addSegment(segment)
+
                 segments[segment.rname][segment.pos][segment.id[-1]] = segment
                 segments_to_check[segment.id[-1]] = [segment.pos, segment.end]
                 previous_refname = line.reference_name
@@ -147,10 +147,8 @@ def parse_chr_bam(q, q_out, bamfile):
             read_snp_vcf()
         write_bed()
         F.close()
-        q_out.put([segments,variants])
-#        print( contig, reads )
 
-
+        q_out.put( (segments, variants) )
 
 def calculate_pid(line, query_alignment_length):
     """
@@ -167,7 +165,6 @@ def calculate_pid(line, query_alignment_length):
         if pid == "0.000":
             pid = format(line.get_cigar_stats()[0][0] / query_alignment_length, '.3f')
     return pid
-
 
 def calculate_clip(line):
     """
@@ -195,7 +192,6 @@ def calculate_clip(line):
             clip_2 = 0
     return [clip, clip_2]
 
-
 def create_pattern():
     """
     creates a pattern to search for deletions and indels in cigar string using regular expressions
@@ -212,7 +208,6 @@ def create_pattern():
     pattern_list.append("\d{" + str(len(NanoSV.opts_min_indel_size) + 1) + ",}")
     pattern = re.compile(r'' + "(" + "|".join(pattern_list) + ")([DI])" + '')
     return pattern
-
 
 def search_for_indels(line, clip, clip_2):
     """
@@ -317,7 +312,6 @@ def search_for_indels(line, clip, clip_2):
         created_subsegments.append(segment)
     return created_subsegments
 
-
 def read_snp_vcf():
     """Reads vcf/bedfile with pre-set SNP positions and calls find_SNPs() to save the variants"""
     with open(NanoSV.opts_snp_file, "r") as snp_file:
@@ -329,7 +323,6 @@ def read_snp_vcf():
                 columns = line.split("\t")
                 if len(columns) > 1:
                     find_SNPs(columns[0], int(columns[1]))
-
 
 def find_SNPs(chromosome, snp_position):
     """
@@ -367,7 +360,6 @@ def find_SNPs(chromosome, snp_position):
         except ZeroDivisionError:
                 ""
 
-
 def keep_segment(line, query_alignment_length):
     """
     Calls calculate_pid() and checks if pid meets requirement to use read in NanoSV. If so, returns pid; else False
@@ -381,7 +373,6 @@ def keep_segment(line, query_alignment_length):
     if float(pid) < NanoSV.opts_min_pid:
         return False
     return pid
-
 
 def find_variations_md(cigartuples, chromosome, pos, qual, seq, md, subsegments):
     """
@@ -438,7 +429,6 @@ def find_variations_md(cigartuples, chromosome, pos, qual, seq, md, subsegments)
             ref_cursor += tuple[1]
             read_cursor += tuple[1]
 
-
 def find_variations_cigar(cigartuples, chromosome, pos, qual, seq, subsegments):
     """
     Loops through read to find variant base. This function is used with LAST bam files
@@ -483,7 +473,6 @@ def find_variations_cigar(cigartuples, chromosome, pos, qual, seq, subsegments):
             read_cursor += tuple[1]
         elif tuple[0] == 1:
             read_cursor += tuple[1]
-
 
 def remove_variations(start, end, chr):
     """
@@ -539,7 +528,6 @@ def remove_variations(start, end, chr):
             except ZeroDivisionError:
                 ""
         del tmp_variants[position]
-
 
 def write_bed():
     """
