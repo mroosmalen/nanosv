@@ -1,15 +1,14 @@
 #!/usr/bin/python
 
-
 class Read:
     def __init__(self, qname, length):
         self.qname = qname
         self.length = length
-        self.segments = dict()
+        self.segments = {}
 
     def addSegment(self, segment):
         """
         Adds segment to read
         :param segment:
         """
-        self.segments[segment.clip] = segment.id
+        self.segments[segment.clip] = [segment.rname, segment.pos]
