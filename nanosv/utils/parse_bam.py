@@ -4,16 +4,15 @@ import re
 import sys
 import time
 import os
-import NanoSV
 import multiprocessing as mp
 import queue
-
 
 from classes import read as r
 from classes import segment as s
 from classes import variant as v
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+import NanoSV
 
 segments = {}
 variants = {}

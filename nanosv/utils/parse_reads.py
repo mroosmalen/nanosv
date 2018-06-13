@@ -2,14 +2,14 @@
 import sys
 import time
 import os
-import NanoSV
 
 from collections import defaultdict
+
 from classes import breakpoint as b
 from utils import parse_bam as bam
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-
+import NanoSV
 
 breakpoints = {}
 breakpoints_region = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
@@ -45,7 +45,7 @@ def parse_reads():
                 breakpoint.switchSegments()
             breakpoint.setSVtype()
             breakpoints[breakpoint.id] = breakpoint
-            values = ( breakpoint.svtype, str(breakpoint.segment_1["rname"]), str(breakpoint.segment_2["rname"]), str(breakpoint.segment_1["flag"]), str(breakpoint.segment_2["flag"]) )
+            values = (breakpoint.svtype, str(breakpoint.segment_1["rname"]), str(breakpoint.segment_2["rname"]), str(breakpoint.segment_1["flag"]), str(breakpoint.segment_2["flag"]))
             breakpoints_region["\t".join(values)][breakpoint.segment_1["pos"]][breakpoint.id] = 1
             if i == 0 and segment_1.clip >= NanoSV.opts_hanging_length:
                 hanging_breakpoint_pos = segment_1.pos

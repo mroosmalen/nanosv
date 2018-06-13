@@ -6,22 +6,15 @@ import NanoSV
 import random
 matrix = []
 
-# def print_wigard_lijst(bp):
-#     for segment in wigard_lijst[bp]:
-#         segment[1] = ";".join([str(x) for x in segment[1]])
-#         print("\t".join([str(i) for i in segment]))
-
-
 def make_matrix(sv_id, windows):
     """
-    Create matrix of positions and reads with their ref/alt/- as variable. Parse phasing result and select 
+    Create matrix of positions and reads with their ref/alt/- as variable. Parse phasing result and select
     best result
-    :param sv_id: 
-    :param windows: 
-    :return best result with the purity, phasing score and snps used: 
+    :param sv_id:
+    :param windows:
+    :return best result with the purity, phasing score and snps used:
     """
-    global matrix, wigard_lijst
-    # wigard_lijst = [[],[]]
+    global matrix
     x = 0
     scores = [0,0,0,0]
     bp = -1
@@ -37,11 +30,6 @@ def make_matrix(sv_id, windows):
             bin_start = 0
         if bin_end > c_vcf.vcf.contigs[chr][1]:
             bin_end = int(c_vcf.vcf.contigs[chr][1] / NanoSV.opts_variant_bin_size)
-        # for qname_clip in breakpoint.structural_variants[sv_id].ref_qname_clips[x]:
-            # if x == 0:
-            #     wigard_lijst[0].append([sv_id, qname_clip, "ref", 0])
-            # else:
-            #     wigard_lijst[1].append([sv_id, qname_clip, "ref", 0])
         sv_reads = get_sv_reads(sv_id, x)
         for bin in range(bin_start, bin_end+1):
             for variant_position in bam.variants[chr][bin]:
@@ -64,38 +52,34 @@ def make_matrix(sv_id, windows):
             if len(set(matrix[segment-deleted])) <= 1 and matrix[segment-deleted][0] == "-":
                 del matrix[segment-deleted]
                 deleted += 1
-    # print_wigard_lijst(bp)
     return scores
 
 
 def get_sv_reads(sv_id, x):
     """
     gets reads supporting the sv. Used later to evaluate clustering
-    :param sv_id: 
-    :param x: 
-    :return list with sv_reads: 
+    :param sv_id:
+    :param x:
+    :return list with sv_reads:
     """
-    # global wigard_lijst
     sv_reads = []
     for bp_id in breakpoint.structural_variants[sv_id].breakpoints:
         if x == 0:
             sv_reads.append(read.breakpoints[bp_id].segment_1['id'])
-            # wigard_lijst[0].append([sv_id, read.breakpoints[bp_id].segment_1['id'], "alt", 0])
         else:
             sv_reads.append(read.breakpoints[bp_id].segment_2['id'])
-            # wigard_lijst[1].append([sv_id, read.breakpoints[bp_id].segment_2['id'], "alt", 0])
     return sv_reads
 
 
 def matrix_fill_position(sv_or_ref, variant_position, sv_id, chr, bin, x):
     """
     fill position in matrix with correct value for either ref or alt base, or a - with unknown haplotype
-    :param sv_or_ref: 
-    :param variant_position: 
-    :param sv_id: 
-    :param chr: 
-    :param bin: 
-    :param x: 
+    :param sv_or_ref:
+    :param variant_position:
+    :param sv_id:
+    :param chr:
+    :param bin:
+    :param x:
     """
     global matrix
     for segment_id in sv_or_ref:
@@ -128,10 +112,10 @@ def clustering(matrix, sv_reads, bp_id):
     """
     creates clustering matrix by calling make_clustering_matrix(). Clusters most similar reads and sends
     result to judge_clustering to be evaluated. Result comes back and is returned.
-    :param matrix: 
-    :param sv_reads: 
-    :param bp_id: 
-    :return phasing result: 
+    :param matrix:
+    :param sv_reads:
+    :param bp_id:
+    :return phasing result:
     """
     clustering_matrix = make_clustering_matrix(matrix)
     while len(clustering_matrix) > 2:
@@ -183,15 +167,14 @@ def clustering(matrix, sv_reads, bp_id):
 
 def judge_clustering(clustering_matrix, sv_reads, total_reads, x):
     """
-    Judges clustering result and calculates purity and phasing scores. Also calls randomise() 100000 times to get a 
-    random result. With these random results a p-value can be calculated. 
-    :param clustering_matrix: 
-    :param sv_reads: 
-    :param total_reads: 
-    :param x: 
-    :return list with purity score, phasing score and p-value: 
+    Judges clustering result and calculates purity and phasing scores. Also calls randomise() 100000 times to get a
+    random result. With these random results a p-value can be calculated.
+    :param clustering_matrix:
+    :param sv_reads:
+    :param total_reads:
+    :param x:
+    :return list with purity score, phasing score and p-value:
     """
-    # global wigard_lijst
     purity_chart = []
     phasing_chart = []
     clusters = []
@@ -213,12 +196,8 @@ def judge_clustering(clustering_matrix, sv_reads, total_reads, x):
         for read in cluster:
             if int(read) in sv_reads:
                 amounts[0] += 1
-                # wigard_lijst[int(x)][int(read)][2] = "alt"
             else:
                 amounts[1] += 1
-                # wigard_lijst[int(x)][int(read)][2] = "ref"
-
-            # wigard_lijst[int(x)][int(read)][3] = clusternr
         amounts_per_cluster.append(amounts)
     pur_percentage_per_cluster = []
     phasing_percentage_per_cluster = []
@@ -262,10 +241,10 @@ def judge_clustering(clustering_matrix, sv_reads, total_reads, x):
 
 def randomise(longest_clusters, sv_reads):
     """
-    Creates a random result and calculates scores to be used with a calculation of the p-value. 
-    :param longest_clusters: 
-    :param sv_reads: 
-    :return purity score: 
+    Creates a random result and calculates scores to be used with a calculation of the p-value.
+    :param longest_clusters:
+    :param sv_reads:
+    :return purity score:
     """
     random_options = []
     for ref in range(len(matrix) - len(sv_reads)):
@@ -305,8 +284,8 @@ def randomise(longest_clusters, sv_reads):
 def make_clustering_matrix(matrix):
     """
     calculates similarity between reads to be put in the clustering matrix
-    :param matrix: 
-    :return filled clustering matrix: 
+    :param matrix:
+    :return filled clustering matrix:
     """
     clustering_matrix = {}
     for i in range(len(matrix)):

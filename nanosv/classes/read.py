@@ -4,7 +4,7 @@ class Read:
     def __init__(self, qname, length):
         self.qname = qname
         self.length = length
-        self.segments = {}
+        self.segments = dict()
 
     def addSegment(self, segment):
         """

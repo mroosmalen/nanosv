@@ -3,14 +3,15 @@ import re
 import sys
 import time
 import os
-import NanoSV
 
 from collections import defaultdict
+
 from classes import sv as svclass
 from utils import parse_reads as read
 from utils import parse_bam as bam
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+import NanoSV
 
 svID = 1
 structural_variants = {}
@@ -25,8 +26,8 @@ def addSVInfo(sv):
     """
     if sum(sv.format['DV']) >= NanoSV.opts_cluster_count * 2:
         flag_list = [sv.flag1, sv.flag2]
-        for flag_idx in range(len(flag_list)):            
-            if ( flag_idx == 0 and not flag_list[flag_idx] & 16 ) or ( flag_idx == 1 and flag_list[flag_idx] & 16 ):
+        for flag_idx in range(len(flag_list)):
+            if (flag_idx == 0 and not flag_list[flag_idx] & 16) or (flag_idx == 1 and flag_list[flag_idx] & 16):
                 head_tail = 'T'
             else:
                 head_tail = 'H'

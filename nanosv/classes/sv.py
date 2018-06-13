@@ -1,22 +1,20 @@
 #!/usr/bin/python
 import sys
 import pysam
-
-from math import log10
-from statistics import median
-from version import __version__
-from utils import parse_bam as bam
-from utils import coverage
-
 import collections
 import math
 import os
 import vcf as py_vcf
-import NanoSV
 
+from math import log10
+from statistics import median
+from version import __version__
+
+from utils import parse_bam as bam
+from utils import coverage
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-
+import NanoSV
 
 class SV:
     def __init__(self, id, breakpoint):
@@ -167,7 +165,7 @@ class SV:
 
         pplist = []
         for gt in gt_lplist:
-            pplist.append( 10 ** gt )
+            pplist.append(10 ** gt)
             gt_sum += 10 ** gt
 
         if gt_sum > 0:
@@ -176,9 +174,9 @@ class SV:
             plplist = []
             for p in npplist:
                 if p > 0:
-                    plplist.append( int( -10 * log10( p ) ) )
+                    plplist.append(int(-10 * log10(p)))
                 else:
-                    plplist.append( 9999 )
+                    plplist.append(9999)
 
             gt_idx = plplist.index(min(plplist))
             gq_idx = plplist.index(sorted(plplist)[1])
@@ -217,9 +215,9 @@ class SV:
         dupdel_coverages = []
 
         if 'sambamba' in NanoSV.opts_sambamba:
-            cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
+            cmd = NanoSV.opts_sambamba + " depth base --min-coverage=0 " + NanoSV.opts_bam + " -L " + position + " --nthreads=" + NanoSV.opts_threads + " 2> /dev/null | awk '{if (NR!=1) print $3}'"
         elif 'samtools' in NanoSV.opts_sambamba:
-            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{if (NR!=1) print $3}'"
+            cmd = NanoSV.opts_sambamba + " depth " + NanoSV.opts_bam + " -r " + position + " | awk '{print $3}'"
 
         with os.popen(cmd) as commandoutput:
             for line in commandoutput:
@@ -274,9 +272,13 @@ class SV:
             if field == "RT":
                 rt = [0, 0, 0]
                 for type in self.info[field]:
-                    if type == "2d": rt[0] += 1
-                    if type == "template": rt[1] += 1
-                    if type == "complement": rt[2] += 1
+                    if type == "2d":
+                        rt[0] += 1
+                    if type == "template":
+                        rt[1] += 1
+                    if type == "complement":
+                        rt[2] += 1
+
                 self.info[field] = rt
             elif isinstance(self.info[field], list):
                 if isinstance(self.info[field][0], list):
@@ -289,7 +291,7 @@ class SV:
                         self.info[field][0] = round(self.info[field][0], 3)
                         self.info[field][1] = round(self.info[field][1], 3)
                 else:
-                    if not 'CI' in field:
+                    if 'CI' not in field:
                         self.info[field] = self.median_type(self.info[field])
 
     def median_type(self, toCalculate):
@@ -315,7 +317,8 @@ class SV:
         format_list.insert(0, 'GT')
         format = ':'.join(format_list)
 
-        call = py_vcf.model._Call('site', bam.sample_name, collections.namedtuple('CallData', format_list)(**self.format))
+        data = collections.namedtuple('CallData', format_list)(**self.format)
+        call = py_vcf.model._Call('site', bam.sample_name, data)
         samples_indexes = [0]
         samples = [call]
         return [format, samples_indexes, samples]
@@ -328,6 +331,5 @@ class SV:
         format_output = self.setFormat()
         if isinstance(self.alt, py_vcf.model._Breakend):
             del self.info['END']
-        record = py_vcf.model._Record(self.chr, self.pos, self.id, self.ref, [self.alt], self.qual, self.filter,
-                                      self.info, format_output[0], format_output[1], format_output[2])
+        record = py_vcf.model._Record(self.chr, self.pos, self.id, self.ref, [self.alt], self.qual, self.filter, self.info, format_output[0], format_output[1], format_output[2])
         vcf_writer.write_record(record)
