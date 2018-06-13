@@ -24,9 +24,9 @@ opts_output = args.output
 opts_snp_file = args.snp_file
 cfg = configparser.ConfigParser()
 if not args.config == os.path.dirname(os.path.abspath(__file__))+"/config.ini":
-    cfg.read([ os.path.dirname(os.path.abspath(__file__))+"/config.ini", args.config ])
+    cfg.read([os.path.dirname(os.path.abspath(__file__))+"/config.ini", args.config])
 else:
-    cfg.read( args.config )
+    cfg.read(args.config)
 
 opts_max_split = int(cfg.get('Filter options', 'max_split'))
 opts_min_pid = float(cfg.get('Filter options', 'min_pid'))
@@ -40,7 +40,7 @@ opts_mate_distance = int(cfg.get('Detection options', 'mate_distance'))
 opts_depth_support = cfg.getboolean('Detection options', 'depth_support')
 opts_min_indel_size = str(cfg.get('Detection options', 'min_indel_size'))
 
-opts_qual_flag = int(cfg.get('Output filter options', 'qual_flag') )
+opts_qual_flag = int(cfg.get('Output filter options', 'qual_flag'))
 opts_window_size = int(cfg.get('Output filter options', 'window_size'))
 opts_svcluster = int(cfg.get('Output filter options', 'svcluster'))
 opts_mapq_flag = int(cfg.get('Output filter options', 'mapq_flag'))
@@ -59,7 +59,7 @@ opts_min_occurences_of_highq_var = float(cfg.get('Phasing Options', 'min_highq_v
 opts_minimum_coverage = int(cfg.get('Phasing Options', 'min_coverage'))
 
 def main():
-    print("NanoSV gestart")
+
     if opts_depth_support:
         utils.coverage.calculate_coverage_bed()
     else:
