@@ -15,13 +15,13 @@ class Breakpoint:
             "id": segment_1.id,
             "rname": segment_1.rname,
             "flag": flag_1,
-            "mapq":segment_1.mapq
+            "mapq": segment_1.mapq
         }
         self.segment_2 = {
             "id": segment_2.id,
             "rname": segment_2.rname,
             "flag": flag_2,
-            "mapq":segment_2.mapq
+            "mapq": segment_2.mapq
         }
 
     def setGap(self, gap):
