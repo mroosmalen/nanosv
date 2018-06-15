@@ -45,7 +45,6 @@ def parse_bam():
     contig_list = []
     for contig_dict in header['SQ']:
         contig_list.append(contig_dict['SN'])
-    bam.close()
 
     q = mp.Queue()
     q_out = mp.Queue()
@@ -85,12 +84,15 @@ def parse_bam():
                     read = r.Read(segment.qname, segment.rlength)
                     reads[segment.qname] = read
                 read.addSegment(segment)
+    write_bed()
+    bam.close()
+
 
 def parse_chr_bam(q, q_out, bamfile):
     """
     Reachs each alignment for each chromosome. Separate for multiprocessing
     """
-    global segments_to_check, segments, variants, tmp_variants
+    global segments_to_check, segments, variants, tmp_variants, F
 
     while True:
 
@@ -143,8 +145,7 @@ def parse_chr_bam(q, q_out, bamfile):
                 remove_variations(previous_cursor, line.reference_start, line.reference_name)
             previous_cursor = line.reference_start
         if NanoSV.opts_phasing_on and NanoSV.opts_snp_file:
-            read_snp_vcf()
-        write_bed()
+            read_snp_vcf(contig)
         F.close()
 
         q_out.put( (segments, variants) )
@@ -311,7 +312,7 @@ def search_for_indels(line, clip, clip_2):
         created_subsegments.append(segment)
     return created_subsegments
 
-def read_snp_vcf():
+def read_snp_vcf(contig):
     """Reads vcf/bedfile with pre-set SNP positions and calls find_SNPs() to save the variants"""
     with open(NanoSV.opts_snp_file, "r") as snp_file:
         snp_nummer = 1
@@ -321,7 +322,8 @@ def read_snp_vcf():
             if not line.startswith("#"):
                 columns = line.split("\t")
                 if len(columns) > 1:
-                    find_SNPs(columns[0], int(columns[1]))
+            	    if columns[0] == contig:
+                        find_SNPs(columns[0], int(columns[1]))
 
 def find_SNPs(chromosome, snp_position):
     """
@@ -333,9 +335,9 @@ def find_SNPs(chromosome, snp_position):
     deletions = 0
     total_n = 0
     variant = v.Variant(chromosome, int(snp_position))
-    for pileupcolumn in bam.pileup(chromosome, int(snp_position)-1, int(snp_position), truncate=True):
+    for pileupcolumn in F.pileup(chromosome, int(snp_position)-1, int(snp_position), truncate=True):
         for pileupread in pileupcolumn.pileups:
-            if not keep_segment(pileupread.alignment):
+            if not keep_segment(pileupread.alignment, pileupread.alignment.query_alignment_length):
                 continue
             clip, clip_2 = calculate_clip(pileupread.alignment)
             if pileupread.is_del:
@@ -532,9 +534,9 @@ def write_bed():
     """
     Writes all phasing SNP positions to a bed output file.
     """
-    with open("variants_of_sim.bed", 'w') as bedfile:
+    with open("snp_positions_used_for_phasing.bed", 'w') as bedfile:
         for chromosome in variants:
             for bin in variants[chromosome]:
                 for position, object in variants[chromosome][bin].items():
-                    string = str(chromosome) + "\t" + str(position)
+                    string = str(chromosome) + "\t" + str(position) + "\n"
                     bedfile.write(string)
