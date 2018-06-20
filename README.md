@@ -153,11 +153,11 @@ Note that if you are performing SV calling on a large genome (e.g. human) and ar
 #### optional configuration parameters:
 NanoSV uses a config.ini file which contains default settings for all running parameters. Users can change the parameters by creating their own config.ini file and provide this as a command line argument [-c]
 ```
-#Reads and segments options
+#Reads segments options
 [Filter options]
-# Maximum number of segments per read resulting from the mapping of the read the a reference sequence
+# Maximum number of segments per read resulting from the mapping of the read to the reference sequence
 max_split = 10
-# Minimum percentage of identical bases of the mapped segment relative to the reference sequence      
+# Minimum percentage of identical bases of the mapped segment relative to the reference sequence
 min_pid = 0.7
 # Minimum mapping quality of the segment
 min_mapq = 20
@@ -168,35 +168,53 @@ min_mapq = 20
 cluster_distance = 10
 # Minimum number of breakpoint-junctions (i.e. split-read junctions) for clustering
 cluster_count = 2
-# Minimum flanking sequence length, to consider a read a reference read, i.e. the sequence mapped left and right of the breakpoint should be larger than the set value
+# Minimum flanking length, to consider a read a reference read
 refreads_distance = 100
-# Minimum length of unmapped sequence for including reads as hanging reads that overlap (support) a break-end
+# Minimum length of unmapped sequence for hanging reads that overlap a break-end
 hanging_length = 20
 # Maximum distance to search for the MATEID, i.e. a reciprocal breakpoint-junction, for example an inversion consist of two breakpoint-junctions (3’-to-3’ and 5’-to-5’)
 mate_distance = 300
-# If TRUE, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’). Needs an auxiliar bed file, provided with -b to the main NanoSV command.
+# If True, NanoSV will check the depth of coverage for possible breakpoint-junctions with orientations that indicate a possible deletion or duplication (3’-to-5’ and 5’-to-3’)
 depth_support = True
+# Minimum indel size to call gap and create subsegments
+min_indel_size = 30
 
 #Parameters for setting the FILTER flag in the vcf output:
 [Output filter options]
-# Filter flag: LowQual, set if the QUAL score of the called structural variation is lower
+# Filter flag: LowQual, if the QUAL score is lower
 qual_flag = 20
-# Filter flag: SVcluster, set if there are more SVs within a window size, they will be marked as SVcluster
+# Filter flag: SVcluster, if there are more SVs within a window size, they will be marked as SVcluster
 window_size = 1000
-# Filter flag: SVcluster, set if the number of SVs within a certain window size (set by window_size above) exceeds this treshold
+# Filter flag: SVcluster, indicating the number of SVs within a certain window size (set by window_size above)
 svcluster = 2
-# Filter flag: MapQual, set if the median mapq is lower than specified by this parameter
+# Filter flag: MapQual, if the median mapq is lower than specified by this parameter
 mapq_flag = 80
-# Filter flag: PID, set if the median percentage identity is lower than specified by this parameter
+# Filter flag: PID, if the median percentage identity is lower than specified by this parameter
 pid_flag = 0.80
-# Filter flag: Gap, set if the median GAP is higher than specified by this parameter
+# Filter flag: Gap, if the median GAP is higher than specified by this parameter
 gap_flag = 100
-# Filter flag: CIPOS|CIEND, set if the CIPOS|CIEND is larger than specified by this parameter
+# Filter flag: CIPOS|CIEND, if the CIPOS|CIEND bigger than specified by this parameter
 ci_flag = 30
 
-[Runtime options]
-# Number of threads to use with sambamba
-sambamba_threads = 1
+[Phasing Options]
+#If True, NanoSV will use phasing as an addition in calling SVs
+phasing_on = False
+#SNP positions are stored in bins to improve speed. This setting sets the bin size
+variant_bin_size = 1000000
+#Window measured from the breakpoint in which SNPs are sought to be used in read clustering
+phasing_window = 7000
+#Minimum coverage to call a SNP for phasing
+min_coverage = 10
+#Maximum percentage of deletions on position
+max_deletions = 0.25
+#Minimum occurence of variant to call a SNP for phasing
+min_occurences_of_var = 0.4
+#Minimum occurence of high quality calls of certain variant
+min_highq_var = 0.6
+#Minimum quality to call 'high quality'
+min_base_qual_ph = 11
+#cut-off setting to stop clustering if highest similarity between reads is too low
+clustering_cutoff = 0.3
 ```
 
 #### Ancillary files that can be used for running NanoSV:
