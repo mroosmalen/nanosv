@@ -57,17 +57,17 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 NanoSV has been tested with different long read mappers, including BWA MEM, MINIMAP2, LAST and NGMLR.
 
 #### BWA MEM
-
-bwa mem -x ont2d -M -t 8 <reference> <fastq|fasta>
- 
+```
+> bwa mem -x ont2d -M -t 8 <reference> <fastq|fasta>
+``` 
 #### MINIMAP2
-
-minimap2 -t 8 -a <reference> <fastq|fasta>
- 
+```
+> minimap2 -t 8 -a <reference> <fastq|fasta>
+``` 
 #### NGMLR
-
-ngmlr -x ont -t 8 -r <reference> -q <fastq|fasta>
-
+```
+> ngmlr -x ont -t 8 -r <reference> -q <fastq|fasta>
+```
 #### LAST mapping
 
 We found that LAST alignments give the most accurate results for SV calling with NanoSV. However, mapping with LAST requires more compute resources. Follow the instructions below if you would like to use LAST alignment as input for your SV calling with NanoSV. 
@@ -135,6 +135,8 @@ All of the above commands can also be run at once using pipes:
 ```
 bam              :   /path/to/reads.sorted.bam
 ```
+Note that if you are performing SV calling on a large genome (e.g. human) and are only interested in calling intrachromosomal SVs, you may gain speed by splitting your BAM file by chromosome and running NanoSV per chromosome (on a compute cluster).
+
 #### optional arguments:
 ```
 -h, --help       :   Show the help message and exit
