@@ -10,7 +10,7 @@ NanoSV User Guide
 * [Pre-processing](#pre-processing)
   * [Basecalling](#basecalling)
   * [Mapping](#mapping)
-  * [LAST mapping](#last-mapping)
+  * [LAST](#last-mapping)
     * [LAST installation](#last-installation)
     * [Running LAST](#running-last)
 * [SV calling using NanoSV](#sv-calling-using-nanosv)
@@ -20,6 +20,7 @@ NanoSV User Guide
     * [Optional arguments](#optional-arguments)
     * [Optional configuration parameters](#optional-configuration-parameters)
     * [Ancillary files that can be used for running NanoSV](#ancillary-files-that-can-be-used-for-running-nanosv)
+  * [NanoSV output](#nanosv-output)
     
 [//]: # (END automated TOC section, any edits will be overwritten on next source refresh)
 
@@ -54,7 +55,7 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### Mapping
 
-NanoSV has been tested with different long read mappers, including BWA MEM, MINIMAP2, LAST and NGMLR.
+NanoSV has been tested with different long read mappers, including BWA MEM, MINIMAP2, LAST and NGMLR. Below you can see how we tipically run these mappers. 
 
 #### BWA MEM
 ```
@@ -68,7 +69,7 @@ NanoSV has been tested with different long read mappers, including BWA MEM, MINI
 ```
 > ngmlr -x ont -t 8 -r <reference> -q <fastq|fasta>
 ```
-#### LAST mapping
+#### LAST 
 
 We found that LAST alignments give the most accurate results for SV calling with NanoSV. However, mapping with LAST requires more compute resources. Follow the instructions below if you would like to use LAST alignment as input for your SV calling with NanoSV. 
 
@@ -135,7 +136,7 @@ All of the above commands can also be run at once using pipes:
 ```
 bam              :   /path/to/reads.sorted.bam
 ```
-Note that if you are performing SV calling on a large genome (e.g. human) and are only interested in calling intrachromosomal SVs, you may gain speed by splitting your BAM file by chromosome and running NanoSV per chromosome (on a compute cluster).
+This BAM file needs to be coordinate-sorted and indexed. Note that if you are performing SV calling on a large genome (e.g. human) and are only interested in calling intrachromosomal SVs, you may gain speed by splitting your BAM file by chromosome and running NanoSV per chromosome (on a compute cluster). 
 
 #### optional arguments:
 ```
@@ -199,6 +200,7 @@ gap_flag = 100
 ci_flag = 30
 
 [Phasing Options]
+##Phasing is still experimental for now and needs to be properly tested and benchmarked, so use it under your own responsibility. 
 #If True, NanoSV will use phasing as an addition in calling SVs
 phasing_on = False
 #SNP positions are stored in bins to improve speed. This setting sets the bin size
@@ -222,3 +224,11 @@ clustering_cutoff = 0.3
 #### Ancillary files that can be used for running NanoSV:
 To estimate a coverage increase or decrease near predicted breakpoint-junctions, the average coverage across a putative deletion or duplication interval is compared to the distribution of coverage across random positions in the reference sequence. This calculation is only performed if `depth_support = True` in config.ini. A default bed file is provided that contains 1,000,000 random positions on the hg19/GRCh37 human genome reference, excluding simple repeat regions (http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/simpleRepeat.txt.gz) and gap regions (http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/gap.txt.gz). The file format is standard BED format (chr\<TAB\>startpos\<TAB\>endpos).
 
+#### NanoSV output
+NanoSV will output a VCF file. After dealing with mis-sinterpration of the breakpoint orientation in the past, we decided to call only breakpoints instead of SV types (such as inversions, deletions, etc.) We want to leave the interpretation of the breakpoints to our users and leave the output as "assumption-free" as possible.
+These breakpoints (BNDs) are reported using the standard VCF specifications described in https://samtools.github.io/hts-specs/VCFv4.2.pdf (chapter 5.4) .
+Using the depth_support mode (on by default), we test if there is a significant coverage change around a breakpoint with the right orientation to be able to interpret deletions and duplications.
+The reported breakpoints will also have flags in the FILTER field according to the threshold filter values chosen in the config file.
+
+### Phasing on NanoSV
+We are working on haplotype-aware SV detection with NanoSV. However, it still needs to be properly tested and benchmarked. If you feel brave enough to try it, go for it (and report back to us with feedback). It will try to look for useful phasing SNPs around the breakpoints on the long read data, increasing a lot the runtime. Please check the appropiate settings on the config file.
