@@ -56,23 +56,23 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 NanoSV has been tested with different long read mappers, including BWA MEM, MINIMAP2, LAST and NGMLR.
 
-### BWA MEM
+#### BWA MEM
 
 bwa mem -x ont2d -M -t 8 <reference> <fastq|fasta>
  
-### MINIMAP2
+#### MINIMAP2
 
 minimap2 -t 8 -a <reference> <fastq|fasta>
  
-### NGMLR
+#### NGMLR
 
 ngmlr -x ont -t 8 -r <reference> -q <fastq|fasta>
 
-### LAST mapping
+#### LAST mapping
 
-We found that LAST alignments gives the most accurate results for SV calling with NanoSV. However, mapping with LAST requires more compute resources. Follow the instructions below if you would like to use LAST alignment as input for your SV calling with NanoSV. 
+We found that LAST alignments give the most accurate results for SV calling with NanoSV. However, mapping with LAST requires more compute resources. Follow the instructions below if you would like to use LAST alignment as input for your SV calling with NanoSV. 
 
-#### LAST installation
+##### LAST installation
 
 Download the zip file from http://last.cbrc.jp/
 ```
@@ -81,7 +81,7 @@ Download the zip file from http://last.cbrc.jp/
 > make
 ```
 
-#### Running LAST
+##### Running LAST
 First you need to index your reference genome by creating a lastal database:
 ```
 > lastdb [referencedb] [reference.fa]
