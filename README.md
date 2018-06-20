@@ -141,6 +141,8 @@ Note that if you are performing SV calling on a large genome (e.g. human) and ar
 ```
 -h, --help       :   Show the help message and exit
 
+-t, --threads    :   Maximum number of threads to use
+
 -s, --sambamba   :   Give the full path to the sambamba or samtools executable [default: sambamba ]
 
 -c, --config     :   Give the full path to your own ini file [ default: config.ini ]
