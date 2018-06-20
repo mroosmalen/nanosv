@@ -25,9 +25,12 @@ NanoSV User Guide
 
 ## NanoSV 
 ### Summary
-NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences sequencers.
-NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: https://www.nature.com/articles/s41467-017-01343-4
-The core algorithm of NanoSV identifies split mapped reads and clusters the split-mapped orientations and genomic positions to identify breakpoint-junctions of structural variations.
+NanoSV is a software package that can be used to identify structural genomic variations in long-read sequencing data, such as data produced by Oxford Nanopore Technologies’ MinION, GridION or PromethION instruments, or Pacific Biosciences RSII or Sequel sequencers.
+NanoSV has been extensively tested using Oxford Nanopore MinION sequencing data, as described here: 
+https://www.nature.com/articles/s41467-017-01343-4
+https://link.springer.com/article/10.1007%2Fs00401-017-1743-5
+
+The core algorithm of NanoSV identifies split- and gapped-aligned reads and clusters the reads according to the orientations and genomic positions of the read segments to define breakpoint-junctions of structural variations.
 
 ### Installation
 NanoSV needs a working installation of python 3. You can install NanoSV using pip:
@@ -51,13 +54,25 @@ Raw sequencing data can be basecalled using any available basecaller that is sui
 
 ### Mapping
 
-NanoSV was built based on LAST mapping data. The current version of NanoSV is now also compatible with BWA MEM, MINIMAP2 and NGMLR.
+NanoSV has been tested with different long read mappers, including BWA MEM, MINIMAP2, LAST and NGMLR.
 
-### LAST mapping
+#### BWA MEM
+```
+> bwa mem -x ont2d -M -t 8 <reference> <fastq|fasta>
+``` 
+#### MINIMAP2
+```
+> minimap2 -t 8 -a <reference> <fastq|fasta>
+``` 
+#### NGMLR
+```
+> ngmlr -x ont -t 8 -r <reference> -q <fastq|fasta>
+```
+#### LAST mapping
 
-LAST is able to map the reads in *non-overlapping* split segments.
+We found that LAST alignments give the most accurate results for SV calling with NanoSV. However, mapping with LAST requires more compute resources. Follow the instructions below if you would like to use LAST alignment as input for your SV calling with NanoSV. 
 
-#### LAST installation
+##### LAST installation
 
 Download the zip file from http://last.cbrc.jp/
 ```
@@ -66,7 +81,7 @@ Download the zip file from http://last.cbrc.jp/
 > make
 ```
 
-#### Running LAST
+##### Running LAST
 First you need to index your reference genome by creating a lastal database:
 ```
 > lastdb [referencedb] [reference.fa]
@@ -120,6 +135,8 @@ All of the above commands can also be run at once using pipes:
 ```
 bam              :   /path/to/reads.sorted.bam
 ```
+Note that if you are performing SV calling on a large genome (e.g. human) and are only interested in calling intrachromosomal SVs, you may gain speed by splitting your BAM file by chromosome and running NanoSV per chromosome (on a compute cluster).
+
 #### optional arguments:
 ```
 -h, --help       :   Show the help message and exit
