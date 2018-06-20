@@ -126,7 +126,7 @@ All of the above commands can also be run at once using pipes:
 
 ### NanoSV usage
 ```
-> NanoSV [-h] [-s SAMBAMBA] [-c CONFIG] [-b BED] [-o OUTPUT] [reads.sorted.bam]
+> NanoSV [-h] [-t THREADS] [-s SAMBAMBA] [-c CONFIG] [-b BED] [-o OUTPUT] [reads.sorted.bam]
 ```
 
 ### NanoSV arguments and parameters:
@@ -141,7 +141,7 @@ Note that if you are performing SV calling on a large genome (e.g. human) and ar
 ```
 -h, --help       :   Show the help message and exit
 
--t, --threads    :   Maximum number of threads to use
+-t, --threads    :   Maximum number of threads to use [default: 4 ]
 
 -s, --sambamba   :   Give the full path to the sambamba or samtools executable [default: sambamba ]
 
