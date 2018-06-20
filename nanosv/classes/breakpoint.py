@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 class Breakpoint:
     def __init__(self, id, segment_1, segment_2):
         self.id = id
@@ -49,16 +48,16 @@ class Breakpoint:
             self.segment_2["pos"] = segment_2.pos
 
     def switchSegments(self):
-        """Switches segments in case segment 2 comes before segment 1 in the
-        genome.
+        """
+        Switches segments in case segment 2 comes before segment 1 in the genome
         """
         self.segment_1, self.segment_2 = self.segment_2, self.segment_1
         self.segment_1["flag"] = 0 if self.segment_1["flag"] & 16 else 16
         self.segment_2["flag"] = 0 if self.segment_2["flag"] & 16 else 16
 
     def setSVtype(self):
-        """Sets SV-type to INS in case the difference between the two segments
-        is smaller than the gap setting
+        """
+        Sets SV-type to INS in case the difference between the two segments is smaller than the gap setting
         """
         self.svtype = "BND"
         if abs(self.segment_2["pos"] - self.segment_1["pos"]) < self.gap:
