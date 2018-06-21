@@ -15,7 +15,6 @@ breakpoints = {}
 breakpoints_region = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 hanging_breakpoints_region = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int))))
 
-
 def parse_reads():
     """
     Loops through all reads and saves breakpoints in objects of the Breakpoint class
@@ -29,14 +28,14 @@ def parse_reads():
             continue
         for i in range(0, (len(clips) - 1)):
             i2 = i + 1
-
-            segment_1 = bam.segments[bam.reads[qname].segments[clips[i]]]
-            segment_2 = bam.segments[bam.reads[qname].segments[clips[i2]]]
+            rname1, pos1 = bam.reads[qname].segments[clips[i]]
+            segment_1 = bam.segments[rname1][pos1][qname + ";" + str(clips[i])]
+            rname2, pos2 = bam.reads[qname].segments[clips[i2]]
+            segment_2 = bam.segments[rname2][pos2][qname + ";" + str(clips[i2])]
             segment_1.setPlength(bam.reads[qname].length)
             segment_2.setPlength(bam.reads[qname].length)
             breakpoint = b.Breakpoint(breakpointID, segment_1, segment_2)
             breakpointID += 1
-
             gap = (clips[i2] - (clips[i] + segment_1.length))
             breakpoint.setGap(gap)
             breakpoint.setBreakpoint(segment_1, segment_2)
@@ -44,15 +43,10 @@ def parse_reads():
                 breakpoint.switchSegments()
             elif segment_1.rname == segment_2.rname and breakpoint.segment_1["pos"] > breakpoint.segment_2["pos"]:
                 breakpoint.switchSegments()
-
             breakpoint.setSVtype()
             breakpoints[breakpoint.id] = breakpoint
-            values = (breakpoint.svtype, str(breakpoint.segment_1["rname"]),
-                      str(breakpoint.segment_2["rname"]),
-                      str(breakpoint.segment_1["flag"]),
-                      str(breakpoint.segment_2["flag"]))
+            values = (breakpoint.svtype, str(breakpoint.segment_1["rname"]), str(breakpoint.segment_2["rname"]), str(breakpoint.segment_1["flag"]), str(breakpoint.segment_2["flag"]))
             breakpoints_region["\t".join(values)][breakpoint.segment_1["pos"]][breakpoint.id] = 1
-
             if i == 0 and segment_1.clip >= NanoSV.opts_hanging_length:
                 hanging_breakpoint_pos = segment_1.pos
                 if segment_1.flag & 16:
