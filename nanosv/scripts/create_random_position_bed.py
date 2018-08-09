@@ -43,9 +43,11 @@ def read_bed(file):
         for line in bed:
             line = line.rstrip()
             ch, start, end = line.split("\t")
-            ch = ch.replace('ch', '')
+            ch = ch.replace('chr', '')
             if ch == 'X':
                 ch = 23
+            elif ch == 'Y':
+                ch = 24
             try:
                 ch = int(ch)
             except:
@@ -70,6 +72,7 @@ while len(random_positions.keys()) < pick_random:
     for ch, chrlength in sorted(genome.iteritems()):
         if randnum < tmp_length + chrlength:
             randchr = ch
+            randchr = randchr.replace('chr','')
             randpos = randnum - tmp_length
             break
         tmp_length += chrlength
@@ -83,6 +86,10 @@ while len(random_positions.keys()) < pick_random:
                 mask = True
                 break
     if not mask:
+        if randchr == '23':
+            ranchr = 'X'
+        elif ranchr == '24':
+            randchr = 'Y'
         random_positions["\t".join(
             [str(randchr), str(randpos),
              str(randpos + 1)])] = 1

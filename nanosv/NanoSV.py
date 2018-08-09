@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 
+from version import __version__
 import utils
 
 parser = argparse.ArgumentParser()
@@ -14,6 +15,8 @@ parser.add_argument('-c','--config', default=os.path.dirname(os.path.abspath(__f
 parser.add_argument('-b','--bed', default=os.path.dirname(os.path.abspath(__file__))+"/bedfiles/human_hg19.bed",type=str,help=' Give the full path to your own bed file, used for coverage depth calculations [default: human_hg19.bed ]')
 parser.add_argument('-o','--output',default=sys.stdout,type=argparse.FileType('w'),help='Give the full path to the output vcf file [default: <stdout> ]')
 parser.add_argument('-f', '--snp_file', default=False, type=str, help='Give full path to the SNP variant file for phasing. Supporting file formats: BED and VCF')
+parser.add_argument('-v', '--version', action='version',version='NanoSV {}'.format(__version__))
+
 args = parser.parse_args()
 
 opts_bam = args.bam
