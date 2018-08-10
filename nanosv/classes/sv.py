@@ -84,7 +84,7 @@ class SV:
         else:
             self.info[key] = value
 
-    def significanceTest(self, sv_cov_dist, ref_cov_dist, dup):
+    def significanceTest(self, sv_cov_dist, ref_cov_dist):
         """
         Calculates if there is a significant difference in coverage to call DUP or DEL
         :param avg_dupdel_cov is the distribution with coverage of random positions in the genome:
