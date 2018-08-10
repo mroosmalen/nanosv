@@ -160,15 +160,15 @@ class SV:
                     if opts_depth_support and self.chr == self.chr2:
                         svlen = self.info['SVLEN']
                         if svlen < 1000:
-                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.info['END'])
+                            sv_cov_dist = self.getDupDelcoverage(self.chr, self.pos, self.info['END'])
                             sv_cov_dist_2 = sv_cov_dist
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
-                            ref_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
+                            ref_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
                         else:
-                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.pos+1000)
-                            sv_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-1000, self.pos)
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
+                            sv_cov_dist = self.getDupDelcoverage(self.chr, self.pos, self.pos+1000)
+                            sv_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-1000, self.pos)
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
                         pvalue_1 = significanceTest(sv_cov_dist, ref_cov_dist)
                         pvalue_2 = significanceTest(sv_cov_dist_2, ref_cov_dist_2)
                         self.info['DEPTHPVAL'] = [pvalue_1, pvalue_2]
@@ -216,7 +216,7 @@ class SV:
 
         self.set = 1
 
-    def getDupDelcoverage(chr, start, stop):
+    def getDupDelcoverage(self, chr, start, stop):
         """
         Returns the average coverage of all positions within the start and end of the SV.
         :return average coverage:
