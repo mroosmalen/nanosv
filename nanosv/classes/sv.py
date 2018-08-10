@@ -127,6 +127,7 @@ class SV:
             self.info['SVLEN'] = (self.info['END'] - self.pos)
         self.setInfoField()
         self.setReferenceBase()
+        dup = 0
         if self.alt == "INS":
             self.alt = py_vcf.model._SV("INS")
         if self.alt == "BND":
@@ -150,6 +151,7 @@ class SV:
                         if pvalue_1 < 0.05 and pvalue_2 < 0.05:
                             self.alt = py_vcf.model._SV("DUP")
                             self.info['SVTYPE'] = "DUP"
+                        dup = 1
                 else:
                     self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, True, self.ref, True)
             else:
