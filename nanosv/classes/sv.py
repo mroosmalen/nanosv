@@ -10,6 +10,9 @@ from math import log10
 from statistics import median
 from version import __version__
 
+from scipy import stats
+import numpy as np
+
 from utils import parse_bam as bam
 from utils import coverage
 
@@ -81,28 +84,17 @@ class SV:
         else:
             self.info[key] = value
 
-    def significanceTest(self, avg_dupdel_cov, dup):
+    def significanceTest(self, sv_cov_dist, ref_cov_dist, dup):
         """
         Calculates if there is a significant difference in coverage to call DUP or DEL
         :param avg_dupdel_cov is the distribution with coverage of random positions in the genome:
         :param dup is a boolean. True in case of a duplication, False in case of a deletion:
         :return True or false depending on the outcome of the test. True when there is a significant difference:
         """
-        teller = 0
-        if dup:
-            for value in coverage.coverages:
-                if float(value) > avg_dupdel_cov:
-                    teller += 1
-        else:
-            for value in coverage.coverages:
-                if float(value) < avg_dupdel_cov:
-                    teller += 1
-        if teller / len(coverage.coverages) < 0.05:
-            self.info["DEPTHPVAL"] = '%.3f' % (teller / len(coverage.coverages))
-            return True
-        else:
-            self.info["DEPTHPVAL"] = '%.3f' % (teller / len(coverage.coverages))
-            return False
+        sv_cov_dist = np.asarray(sv_cov_dist)
+        ref_cov_dist = np.asarray(ref_cov_dist)
+
+        return stats.ttest_ind(sv_cov_dist,ref_cov_dist)[1]
 
     def setReferenceBase(self):
         """
@@ -135,7 +127,6 @@ class SV:
             self.info['SVLEN'] = (self.info['END'] - self.pos)
         self.setInfoField()
         self.setReferenceBase()
-        dup = 0
         if self.alt == "INS":
             self.alt = py_vcf.model._SV("INS")
         if self.alt == "BND":
@@ -143,11 +134,22 @@ class SV:
                 if self.flag2 & 16:
                     self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, False, self.ref, True)
                     if opts_depth_support and self.chr == self.chr2:
-                        avg_dupdel_cov = self.getDupDelcoverage()
-                        if self.significanceTest(avg_dupdel_cov, True):
+                        svlen = self.info['SVLEN']
+                        if svlen < 1000:
+                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.info['END'])
+                            sv_cov_dist_2 = sv_cov_dist
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
+                            ref_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
+                        else:
+                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.pos+1000)
+                            sv_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-1000, self.pos)
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
+                        pvalue_1 = significanceTest(sv_cov_dist, ref_cov_dist)
+                        pvalue_2 = significanceTest(sv_cov_dist_2, ref_cov_dist_2)
+                        if pvalue_1 < 0.05 and pvalue_2 < 0.05:
                             self.alt = py_vcf.model._SV("DUP")
                             self.info['SVTYPE'] = "DUP"
-                        dup = 1
                 else:
                     self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), True, True, self.ref, True)
             else:
@@ -156,8 +158,21 @@ class SV:
                 else:
                     self.alt = py_vcf.model._Breakend(self.chr2, int(self.info['END']), False, True, self.ref, True)
                     if opts_depth_support and self.chr == self.chr2:
-                        avg_dupdel_cov = self.getDupDelcoverage()
-                        if self.significanceTest(avg_dupdel_cov, False):
+                        svlen = self.info['SVLEN']
+                        if svlen < 1000:
+                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.info['END'])
+                            sv_cov_dist_2 = sv_cov_dist
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
+                            ref_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
+                        else:
+                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.pos+1000)
+                            sv_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-1000, self.pos)
+                            ref_cov_dist = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
+                        pvalue_1 = significanceTest(sv_cov_dist, ref_cov_dist)
+                        pvalue_2 = significanceTest(sv_cov_dist_2, ref_cov_dist_2)
+                        self.info['DEPTHPVAL'] = [pvalue_1, pvalue_2]
+                        if pvalue_1 < 0.05 and pvalue_2 < 0.05:
                             self.alt = py_vcf.model._SV("DEL")
                             self.info['SVTYPE'] = "DEL"
         gt_lplist = self.bayes_gt(sum(self.format['RO']), sum(self.format['VO']), dup)
@@ -201,17 +216,13 @@ class SV:
 
         self.set = 1
 
-    def getDupDelcoverage(self):
+    def getDupDelcoverage(chr, start, stop):
         """
         Returns the average coverage of all positions within the start and end of the SV.
         :return average coverage:
         """
-        start = round(self.pos)
-        stop = round(self.info['END'])
-        if start > stop:
-            start = round(self.info['END'])
-            stop = round(self.pos)
-        position = str(self.chr) + ":" + str(start) + "-" + str(stop)
+
+        position = chr + ":" + str(start) + "-" + str(stop)
         dupdel_coverages = []
 
         if 'sambamba' in NanoSV.opts_sambamba:
@@ -222,7 +233,7 @@ class SV:
         with os.popen(cmd) as commandoutput:
             for line in commandoutput:
                 dupdel_coverages.append(float(line.rstrip()))
-        return float(sum(dupdel_coverages)) / len(dupdel_coverages)
+        return dupdel_coverages
 
     def log_choose(self, n, k):
         """
