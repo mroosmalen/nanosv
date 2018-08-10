@@ -63,10 +63,10 @@ opts_minimum_coverage = int(cfg.get('Phasing Options', 'min_coverage'))
 
 def main():
 
-    if opts_depth_support:
-        utils.coverage.calculate_coverage_bed()
-    else:
-        coverages = []
+    # if opts_depth_support:
+        # utils.coverage.calculate_coverage_bed()
+    # else:
+        # coverages = []
 
     utils.parse_bam.parse_bam()
 
