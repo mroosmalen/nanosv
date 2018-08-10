@@ -136,17 +136,17 @@ class SV:
                     if opts_depth_support and self.chr == self.chr2:
                         svlen = self.info['SVLEN']
                         if svlen < 1000:
-                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.info['END'])
+                            sv_cov_dist = self.getDupDelcoverage(self.chr, self.pos, self.info['END'])
                             sv_cov_dist_2 = sv_cov_dist
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
-                            ref_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-svlen, self.pos-1)
+                            ref_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+svlen)
                         else:
-                            sv_cov_dist = getDupDelcoverage(self.chr, self.pos, self.pos+1000)
-                            sv_cov_dist_2 = getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.pos-1000, self.pos)
-                            ref_cov_dist = getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
-                        pvalue_1 = significanceTest(sv_cov_dist, ref_cov_dist)
-                        pvalue_2 = significanceTest(sv_cov_dist_2, ref_cov_dist_2)
+                            sv_cov_dist = self.getDupDelcoverage(self.chr, self.pos, self.pos+1000)
+                            sv_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-1000, self.pos)
+                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
+                        pvalue_1 = self.significanceTest(sv_cov_dist, ref_cov_dist)
+                        pvalue_2 = self.significanceTest(sv_cov_dist_2, ref_cov_dist_2)
                         if pvalue_1 < 0.05 and pvalue_2 < 0.05:
                             self.alt = py_vcf.model._SV("DUP")
                             self.info['SVTYPE'] = "DUP"
@@ -169,8 +169,8 @@ class SV:
                             sv_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
                             ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-1000, self.pos)
                             ref_cov_dist = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
-                        pvalue_1 = significanceTest(sv_cov_dist, ref_cov_dist)
-                        pvalue_2 = significanceTest(sv_cov_dist_2, ref_cov_dist_2)
+                        pvalue_1 = self.significanceTest(sv_cov_dist, ref_cov_dist)
+                        pvalue_2 = self.significanceTest(sv_cov_dist_2, ref_cov_dist_2)
                         self.info['DEPTHPVAL'] = [pvalue_1, pvalue_2]
                         if pvalue_1 < 0.05 and pvalue_2 < 0.05:
                             self.alt = py_vcf.model._SV("DEL")
