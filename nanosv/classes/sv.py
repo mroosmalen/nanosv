@@ -170,7 +170,7 @@ class SV:
                             sv_cov_dist = self.getDupDelcoverage(self.chr, self.pos, self.pos+1000)
                             sv_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END']-1000, self.info['END'])
                             ref_cov_dist = self.getDupDelcoverage(self.chr, self.pos-1000, self.pos)
-                            ref_cov_dist = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
+                            ref_cov_dist_2 = self.getDupDelcoverage(self.chr, self.info['END'], self.info['END']+1000)
                         pvalue_1 = self.significanceTest(sv_cov_dist, ref_cov_dist)
                         pvalue_2 = self.significanceTest(sv_cov_dist_2, ref_cov_dist_2)
                         self.info['DEPTHPVAL'] = [pvalue_1, pvalue_2]
