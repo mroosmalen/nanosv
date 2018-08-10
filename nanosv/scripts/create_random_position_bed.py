@@ -3,7 +3,8 @@
 
 import random
 
-pick_random = 100000
+chr_notation = False
+pick_random = 1000000
 mask_regions = {}
 
 genome = {
@@ -72,7 +73,7 @@ while len(random_positions.keys()) < pick_random:
     for ch, chrlength in sorted(genome.iteritems()):
         if randnum < tmp_length + chrlength:
             randchr = ch
-            randchr = randchr.replace('chr','')
+            randchr = int(str(randchr).replace('chr',''))
             randpos = randnum - tmp_length
             break
         tmp_length += chrlength
@@ -87,9 +88,11 @@ while len(random_positions.keys()) < pick_random:
                 break
     if not mask:
         if randchr == '23':
-            ranchr = 'X'
-        elif ranchr == '24':
+            randchr = 'X'
+        elif randchr == '24':
             randchr = 'Y'
+        if chr_notation:
+    	    randchr='chr'+str(randchr)
         random_positions["\t".join(
             [str(randchr), str(randpos),
              str(randpos + 1)])] = 1
