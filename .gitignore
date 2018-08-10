@@ -7,4 +7,6 @@ README.rst
 NanoSV.pyc
 nanosv/utils/__init__.pyc
 nanosv/utils/coverage.pyc
- 
+venv/
+nanosv/utils/*.pyc
+nanosv/*.pyc
