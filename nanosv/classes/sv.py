@@ -29,7 +29,7 @@ class SV:
         self.qual = None
         self.filter = []
         self.info = {
-            'ALT_READ_IDS': [breakpoint.segment_1['qname']],
+            'ALT_READ_IDS': [bam.segments[breakpoint.segment_1[0]][breakpoint.segment_1[1]][breakpoint.segment_1[2]].qname],
             'IMPRECISE': True,
             'END': [breakpoint.segment_2["pos"]],
             'SVTYPE': breakpoint.svtype,
@@ -57,7 +57,7 @@ class SV:
         self.breakpoints.append(breakpoint.id)
         self.pos.append(breakpoint.segment_1["pos"])
         self.info['END'].append(breakpoint.segment_2["pos"])
-        self.info['ALT_READ_IDS'].append(breakpoint.segment_1['qname'])
+        self.info['ALT_READ_IDS'].append(bam.segments[breakpoint.segment_1[0]][breakpoint.segment_1[1]][breakpoint.segment_1[2]].qname)
         self.format['DV'][0] += 1
         self.format['DV'][1] += 1
         self.format['VO'][0] += (1 - 10 ** (-breakpoint.segment_1["mapq"] / 10.0))
