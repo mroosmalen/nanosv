@@ -72,7 +72,9 @@ def set_info_header(vcf):
         'MATEID': py_vcf.parser._Info('MATEID', None, 'String', 'ID of mate breakend', 'NanoSV', __version__),
         'PURITY_SCORE': py_vcf.parser._Info('PURITY_SCORE', None, "Integer", "Purity of clusters after phasing", "NanoSV", __version__),
         'PHASING_SCORE': py_vcf.parser._Info('PHASING_SCORE', None, "Integer", "Percentage of reads in two largest clusters after phasing", "NanoSV", __version__),
-        'SNPS_USED': py_vcf.parser._Info('SNPS_USED', None, "Integer", "SNPs used during phasing", "NanoSV", __version__)
+        'SNPS_USED': py_vcf.parser._Info('SNPS_USED', None, "Integer", "SNPs used during phasing", "NanoSV", __version__),
+        'ALT_READ_IDS': py_vcf.parser._Info('ALT_READ_IDS', None, "String", "Read ids of the supporting alt reads", "NanoSV", __version__),
+        'REF_READ_IDS': py_vcf.parser._Info('REF_READ_IDS', None, "String", "Read ids of the supporting reference reads", "NanoSV", __version__)
     }
 
     if NanoSV.opts_depth_support:

@@ -56,6 +56,7 @@ class SV:
         self.breakpoints.append(breakpoint.id)
         self.pos.append(breakpoint.segment_1["pos"])
         self.info['END'].append(breakpoint.segment_2["pos"])
+        self.info['ALT_READ_IDS'].append(breakpoint.segment_1['rname'])
         self.format['DV'][0] += 1
         self.format['DV'][1] += 1
         self.format['VO'][0] += (1 - 10 ** (-breakpoint.segment_1["mapq"] / 10.0))

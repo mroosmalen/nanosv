@@ -37,6 +37,10 @@ def parse_svs():
                             if sv_min > (bam.segments[chromosome][position][qname_clip].pos + NanoSV.opts_refread_distance) and \
                                     sv_max < (bam.segments[chromosome][position][qname_clip].end - NanoSV.opts_refread_distance):
                                 breakpoint.structural_variants[sv_id].ref_qname_clips[x].append([chromosome, position, qname_clip])
+                                if x == 0:
+                                    breakpoint.structural_variants[sv_id].info['REF_READ_IDS_1'].append(bam.segments[chromosome][position][qname_clip].qname)
+                                elif x == 1:
+                                    breakpoint.structural_variants[sv_id].info['REF_READ_IDS_2'].append(bam.segments[chromosome][position][qname_clip].qname)
                                 breakpoint.structural_variants[sv_id].format['DR'][x] += 1
                                 breakpoint.structural_variants[sv_id].format['RO'][x] += (1 - 10 ** (-bam.segments[chromosome][position][qname_clip].mapq / 10.0))
                 prev_rname = bam.segments[chromosome][position][qname_clip].rname
