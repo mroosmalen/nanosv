@@ -19,6 +19,8 @@ import NanoSV
 class SV:
     def __init__(self, id, breakpoint):
         self.id = id
+        print("BREAKPOINT.SEGMENT_1")
+        print(breakpoint.segment_1)        
         self.chr = breakpoint.segment_1["rname"]
         self.chr2 = breakpoint.segment_2["rname"]
         self.flag1 = breakpoint.segment_1["flag"]
