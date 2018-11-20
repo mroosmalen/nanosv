@@ -57,6 +57,8 @@ class SV:
         self.breakpoints.append(breakpoint.id)
         self.pos.append(breakpoint.segment_1["pos"])
         self.info['END'].append(breakpoint.segment_2["pos"])
+        print("BREAKPOINT.SEGMENT_1")
+        print(breakpoint.segment_1)
         self.info['ALT_READ_IDS'].append(bam.segments[breakpoint.segment_1[0]][breakpoint.segment_1[1]][breakpoint.segment_1[2]].qname)
         self.format['DV'][0] += 1
         self.format['DV'][1] += 1
