@@ -74,7 +74,8 @@ def set_info_header(vcf):
         'PHASING_SCORE': py_vcf.parser._Info('PHASING_SCORE', None, "Integer", "Percentage of reads in two largest clusters after phasing", "NanoSV", __version__),
         'SNPS_USED': py_vcf.parser._Info('SNPS_USED', None, "Integer", "SNPs used during phasing", "NanoSV", __version__),
         'ALT_READ_IDS': py_vcf.parser._Info('ALT_READ_IDS', None, "String", "Read ids of the supporting alt reads", "NanoSV", __version__),
-        'REF_READ_IDS': py_vcf.parser._Info('REF_READ_IDS', None, "String", "Read ids of the supporting reference reads", "NanoSV", __version__)
+        'REF_READ_IDS_1': py_vcf.parser._Info('REF_READ_IDS_1', None, "String", "Read ids of the supporting reference reads for bp1", "NanoSV", __version__),
+        'REF_READ_IDS_2': py_vcf.parser._Info('REF_READ_IDS_2', None, "String", "Read ids of the supporting reference reads for bp2", "NanoSV", __version__)
     }
 
     if NanoSV.opts_depth_support:

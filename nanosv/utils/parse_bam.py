@@ -84,7 +84,8 @@ def parse_bam():
                     read = r.Read(segment.qname, segment.rlength)
                     reads[segment.qname] = read
                 read.addSegment(segment)
-    write_bed()
+    if NanoSV.opts_phasing_on:
+        write_bed()
     bam.close()
 
 
