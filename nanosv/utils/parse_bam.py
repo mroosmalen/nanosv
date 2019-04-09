@@ -58,6 +58,7 @@ def parse_bam():
 
     liveprocs = list(processes)
     while liveprocs:
+        time.sleep(5)
         try:
             while 1:
                 contig_segments, contig_variants = q_out.get(block=False, timeout=1)
@@ -66,7 +67,7 @@ def parse_bam():
         except queue.Empty:
             pass
 
-        time.sleep(0.5)    # Give tasks a chance to put more data in
+        time.sleep(5)    # Give tasks a chance to put more data in
         if not q.empty():
             continue
         liveprocs = [p for p in liveprocs if p.is_alive()]
