@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 exec(open('nanosv/version.py').read())
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.md') as f:
         return f.read()
 
 
